@@ -4,18 +4,23 @@ public class RepetitiveMotionDetector {
     private static int repcount;
     private double[] goldmax;
     private double[] goldmin;
+    private int nextRepCount;
 
     RepetitiveMotionDetector(double[] firstRep){
         this.goldmax = getGoldMax(firstRep);
         this.goldmin = getGoldMin(firstRep);
         this.repcount = 0;
+
+        nextRepCount = 0;
     }
     
     public int getRepcount(){
         return this.repcount;
     }
-    
+    private int limit = 200;
+
     public void countIfRep(double[] array) {
+     
         this.goldmax = getGoldMax(array);
         this.goldmin = getGoldMin(array);
         double[][] maxarr = characterizeReal(array, false);

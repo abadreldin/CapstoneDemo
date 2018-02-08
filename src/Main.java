@@ -14,7 +14,7 @@ public class Main {
         int Fs = 100;
         int sizeOfArray = 512;
         InitialPeriodicMotionDetector initDetector = new InitialPeriodicMotionDetector(Fs, sizeOfArray);
-        RepetitiveMotionDetector repDetector = new RepetitiveMotionDetector(initDetector.firstPeriodicMovement);
+        RepetitiveMotionDetector repDetector = new RepetitiveMotionDetector(initDetector.getFirstPeriodicMovement());
 
         System.out.println(initDetector.getArraySize());
         System.out.println(initDetector.getFs());
@@ -83,9 +83,9 @@ public class Main {
 
             //call InitialPeiodicMotionDetector
             if(initDetector.isPeriodic(pitchRolling, rollRolling, yawRolling)){
-                System.out.println("PERIODIC");
+                //System.out.println("PERIODIC");
                 yawFreqMag = initDetector.getYawFreq();
-                repDetector.countIfRep(yawFreqMag);
+                repDetector.countIfRep(initDetector.getFirstPeriodicMovement());
             }
                 //System.out.println(indexOffset);
                 pitchFreqMag = initDetector.getPitchFreq();
