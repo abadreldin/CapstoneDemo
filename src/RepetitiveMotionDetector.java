@@ -5,31 +5,58 @@ public class RepetitiveMotionDetector {
     private double[] goldmax;
     private double[] goldmin;
     private int nextRepCount;
+    private double [] goldRep;
 
     RepetitiveMotionDetector(double[] firstRep){
         this.goldmax = getGoldMax(firstRep);
         this.goldmin = getGoldMin(firstRep);
         this.repcount = 0;
-
+        this.goldRep = firstRep;
         nextRepCount = 0;
     }
-    
+
     public int getRepcount(){
         return this.repcount;
     }
     private int limit = 200;
 
     public void countIfRep(double[] array) {
-     
-        this.goldmax = getGoldMax(array);
-        this.goldmin = getGoldMin(array);
+        //System.out.println(this.goldmax[0]);
+/*
+        if (nextRepCount > limit) {
+            repcount++;
+            System.out.println("Rep Count: " + repcount);
+            nextRepCount = 0;
+            limit +=5;
+        }
+        else
+            nextRepCount++;*/
+        //this.goldmax = getGoldMax(array);
+        //this.goldmin = getGoldMin(array);
+        /*for(int i = 0; i < array.length; i++)
+            System.out.print(array[i] + "  "  );
+        System.out.println("Single Rep");*/
         double[][] maxarr = characterizeReal(array, false);
         double[][] minarr = characterizeReal(array, true);
+        System.out.println("Max array");
+        for(int i = 0; i < maxarr[0].length; i++)
+            System.out.print(maxarr[0][i] + "  "  + maxarr[1][i] + "  "  );
+        System.out.println("Min array");
+
+        for(int j = 0; j < minarr[0].length; j++)
+            System.out.print(minarr[0][j] + "  " + minarr[1][j] + "  "  );
+        System.out.println("GoldRepMax");
+        for(int k = 0; k < this.goldmax.length; k++)
+            System.out.print(this.goldmax[k] + "  ");
+        System.out.println("GoldRepMin");
+        for(int l = 0; l < this.goldmin.length; l++)
+            System.out.print(this.goldmin[l] + "  ");
         boolean[] momentof = getSpatialDiff(this.goldmax, maxarr, this.goldmin, minarr, minarr[0].length);
-        for(int i = 0; i < momentof.length; i++){
-            if(momentof[i] == true) {
+        for(int index = 0; index < momentof.length; index++){
+            if(momentof[index] == true) {
                 repcount++;
                 System.out.println("Rep Count: " + repcount);
+                return;
             }
         }
     }
