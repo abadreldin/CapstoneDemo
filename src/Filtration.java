@@ -1,21 +1,15 @@
 import java.util.Arrays;
 
 public class Filtration {
-    double data[] = {1, 2, 3, 4, 5, 6}; //fake data
-    double b[] = {1, 2, 3}; //made up b-values
-    int sizeofb = b.length; //the size of b
-    int sizeofdata = data.length; //the number of data points we are storing
-    int numrows = (sizeofdata + sizeofb) - 1; //the number of rows depends on the number of delays
-    double[][] multi = new double[numrows][3]; //a 2-d matrix to store a matrix with 0s for convolution
-    double[] y = new double[numrows];
-    int r = 0; //used to index rows
-    int c = 0; //used to index columns
 
     /* This function will return a 2D Array that has the flipped and filtered arrays as two rows */
-    public static double[][] Filtration(double[] data, double[] b, int capacity, String angle){
+    public static double[][] Filter(double[] data, int capacity, String angle){
         int pitch_flip = 0;
         int roll_flip = 0;
         int yaw_flip = 0;
+        double pitchB[] = {};
+        double rollB[] = {};
+        double yawB[] = {};
         double filtered_data[] = new double[capacity];
 
         if (angle == "pitch") {
@@ -23,23 +17,24 @@ public class Filtration {
             if (pitch_flip == 1) {
                 data[0] = data[0] + 360;
             }
+            filtered_data = Convolution(pitchB, data);
         }
 
-        if (angle == "roll") {
+        else if (angle == "roll") {
             roll_flip = FlipCheck(data, roll_flip);
             if (roll_flip == 1) {
                 data[0] = data[0] + 360;
             }
+            filtered_data = Convolution(rollB, data);
         }
 
-        if (angle == "yaw") {
+        else if (angle == "yaw") {
             yaw_flip = FlipCheck(data, yaw_flip);
             if (yaw_flip == 1) {
                 data[0] = data[0] + 360;
             }
+            filtered_data = Convolution(yawB, data);
         }
-
-        filtered_data = Convolution(b, data);
 
         double[][] result = new double[][]{data, filtered_data};
 
