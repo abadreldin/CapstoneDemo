@@ -11,11 +11,15 @@ public class Filtration {
         double rollB[] = {};
         double yawB[] = {};
         double filtered_data[] = new double[capacity];
+        double intermediate;
 
         if (angle == "pitch") {
             pitch_flip = FlipCheck(data, pitch_flip);
             if (pitch_flip == 1) {
                 data[0] = data[0] + 360;
+            }
+            if (pitch_flip == 2) {
+                data[0] = (360 - data[0]) * -1;
             }
             filtered_data = Convolution(pitchB, data);
         }
@@ -25,6 +29,9 @@ public class Filtration {
             if (roll_flip == 1) {
                 data[0] = data[0] + 360;
             }
+            if (roll_flip == 2) {
+                data[0] = (360 - data[0]) * -1;
+            }
             filtered_data = Convolution(rollB, data);
         }
 
@@ -32,6 +39,9 @@ public class Filtration {
             yaw_flip = FlipCheck(data, yaw_flip);
             if (yaw_flip == 1) {
                 data[0] = data[0] + 360;
+            }
+            if (yaw_flip == 2) {
+                data[0] = (360 - data[0]) * -1;
             }
             filtered_data = Convolution(yawB, data);
         }
@@ -51,19 +61,32 @@ public class Filtration {
 
         //if the data is already flipped we are checking for the point when the current angle is
         //less than 360 and the last was over 360
-        if (alreadyFlipped == 1) {  //alreadyflipped is passed in
+        if (alreadyFlipped == 1) {  //alreadyFlipped is passed in
             if ((lastVal > 360) && (currVal > 300))
                 flip = 0; //if it is no longer flipped, we return false
             else
                 flip = 1; //otherwise we return true
         }
 
+        else if (alreadyFlipped == 2) {
+            if ((lastVal < 0) && (currVal < 300)){
+                flip = 0;
+            }
+            else
+                flip = 2;
+        }
         //if the last point was not flipped then we are checking if the last point was over 300
         //and the current is under 50--> I can show all this logic graphically if it's confusing
         else {
             if ((lastVal > 300) && (currVal < 50)) {
                 flip = 1;
-            } else
+            }
+
+            else if ((lastVal < 50) && (currVal > 300)){
+                flip = 2;
+            }
+
+            else
                 flip = 0;
         }
 
