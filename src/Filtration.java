@@ -7,11 +7,16 @@ public class Filtration {
         int pitch_flip = 0;
         int roll_flip = 0;
         int yaw_flip = 0;
-        double pitchB[] = {};
-        double rollB[] = {};
-        double yawB[] = {};
+        double pitchB[] = {0.0115586129393857, 0.0269127184226144, 0.0689577752425094, 0.124811024018249,
+                0.172306936575946,0.190905865602590,0.172306936575946,0.124811024018249,0.0689577752425094,
+                0.0269127184226144,0.0115586129393857};
+        double rollB[] = {0.0115586129393857, 0.0269127184226144, 0.0689577752425094, 0.124811024018249,
+                0.172306936575946,0.190905865602590,0.172306936575946,0.124811024018249,0.0689577752425094,
+                0.0269127184226144,0.0115586129393857};
+        double yawB[] = {0.0115586129393857, 0.0269127184226144, 0.0689577752425094, 0.124811024018249,
+                0.172306936575946,0.190905865602590,0.172306936575946,0.124811024018249,0.0689577752425094,
+                0.0269127184226144,0.0115586129393857};
         double filtered_data[] = new double[capacity];
-        double intermediate;
 
         if (angle == "pitch") {
             pitch_flip = FlipCheck(data, pitch_flip);
@@ -98,8 +103,8 @@ public class Filtration {
         int sizeofb = b.length; //the size of b
         int sizeofdata = data.length; //the number of data points we are storing
         int numrows = (sizeofdata + sizeofb) - 1; //the number of rows depends on the number of delays
-        double[][] multi = new double[numrows][3]; //a 2-d matrix to store a matrix with 0s for convolution
-        double[] y = new double[numrows];
+        double[][] multi = new double[numrows][sizeofb]; //a 2-d matrix to store a matrix with 0s for convolution
+        double[] y = new double[sizeofdata];
         int r = 0; //used to index rows
         int c = 0; //used to index columns
 
@@ -120,10 +125,12 @@ public class Filtration {
 
         for (r = 0; r < numrows; r++) { //multiply each row by b and sum
             double sum = 0;
-            for (c = 0; c < sizeofb; c++) {
-                sum = (multi[r][c] * b[c]) + sum;
+            if (r < sizeofdata) {
+                for (c = 0; c < sizeofb; c++) {
+                    sum = (multi[r][c] * b[c]) + sum;
+                }
+                y[r] = sum;
             }
-            y[r] = sum;
         }
 
         return y;
