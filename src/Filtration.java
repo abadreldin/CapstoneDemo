@@ -23,7 +23,7 @@ public class Filtration {
         //double filtered_data_down[] = new double[(capacity/5)+1]; //DOWNSAMPLE2: delete this variable
 
         if (angle == "pitch") {
-            pitch_flip = FlipCheck(data, pitch_flip);
+            pitch_flip = PitchFlipCheck(data, pitch_flip);
             if (pitch_flip == 1) {
                 data[0] = data[0] + 360;
             }
@@ -103,6 +103,46 @@ public class Filtration {
             }
 
             else if ((lastVal < 50) && (currVal > 300)){
+                flip = 2;
+            }
+
+            else
+                flip = 0;
+        }
+
+        return flip; //basically returning a true or false on whether the data is still flipped
+    }
+
+    public static int PitchFlipCheck(double[] data, int alreadyFlipped) {
+        int i = 0; //this is used as an index to get the previous data point and current
+        int flip; //this returned, 0 is false, 1 is true
+        double lastVal = data[i + 1];
+        double currVal = data[i];
+
+        //if the data is already flipped we are checking for the point when the current angle is
+        //less than 360 and the last was over 360
+        if (alreadyFlipped == 1) {  //alreadyFlipped is passed in
+            if ((lastVal > 100) && (currVal < 0))
+                flip = 1;
+            else
+                flip = 0; //otherwise we return true
+        }
+
+        else if (alreadyFlipped == 2) {
+            if ((lastVal < 0) && (currVal > 100)){
+                flip = 2;
+            }
+            else
+                flip = 0;
+        }
+        //if the last point was not flipped then we are checking if the last point was over 300
+        //and the current is under 50--> I can show all this logic graphically if it's confusing
+        else {
+            if ((lastVal > 100) && (currVal < 0)) {
+                flip = 1;
+            }
+
+            else if ((lastVal < 0) && (currVal > 100)){
                 flip = 2;
             }
 
