@@ -16,7 +16,11 @@ public class Filtration {
         double yawB[] = {0.0115586129393857, 0.0269127184226144, 0.0689577752425094, 0.124811024018249,
                 0.172306936575946,0.190905865602590,0.172306936575946,0.124811024018249,0.0689577752425094,
                 0.0269127184226144,0.0115586129393857};
-        double filtered_data[] = new double[capacity];
+        double filtered_data[] = new double[capacity * 5]; //DOWNSAMPLE1: remove *5
+        double filtered_data_down[] = new double[capacity]; //DOWNSAMPLE1: delete this variable
+        double data_down[] = new double[capacity]; //DOWNSAMPLE1: delete this variable
+        //double filtered_data[] = new double[capacity];
+        //double filtered_data_down[] = new double[(capacity/5)+1]; //DOWNSAMPLE2: delete this variable
 
         if (angle == "pitch") {
             pitch_flip = FlipCheck(data, pitch_flip);
@@ -51,7 +55,18 @@ public class Filtration {
             filtered_data = Convolution(yawB, data);
         }
 
-        double[][] result = new double[][]{data, filtered_data};
+        for (int i = 0; i < (capacity*5); i++){ //DOWNSAMPLE1: remove entire for loop DOWNSAMPLE2: remove entire for loop
+        //for (int i = 0; i < (capacity); i++){ //DOWNSAMPLE2: remove entire for loop
+            if((i%5) == 0){
+                if (data[i] != 0) //DOWNSAMPLE1: delete this line
+                data_down[i/5] = data[i]; //DOWNSAMPLE1: delete this line
+                if (filtered_data[i] != 0)
+                filtered_data_down[i/5] = filtered_data[i];
+            }
+        }
+
+        double[][] result = new double[][]{data_down, filtered_data_down}; //DOWNSAMPLE1: return data, filtered_data
+        //double[][] result = new double[][]{data, filtered_data_down}; //DOWNSAMPLE2: return data, filtered_data
 
         return result;
 
