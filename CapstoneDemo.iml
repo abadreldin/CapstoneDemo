@@ -10,5 +10,41 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="org.knowm.xchart:xchart:3.5.0" level="project" />
     <orderEntry type="library" name="xchart-3.5" level="project" />
+    <orderEntry type="library" exported="" name="ApachePOI" level="application" />
+    <orderEntry type="library" name="org.apache.poi:poi:3.17" level="project" />
+    <orderEntry type="library" name="poi-3.17" level="project" />
+    <orderEntry type="library" exported="" name="ApachePOI-OOXML" level="application" />
+    <orderEntry type="library" name="org.apache.poi:poi-ooxml:3.17" level="project" />
+    <orderEntry type="library" name="poi-ooxml-3.17" level="project" />
+    <orderEntry type="library" exported="" name="XMLBeans" level="application" />
+    <orderEntry type="library" name="org.apache.xmlbeans:xmlbeans:2.3.0" level="project" />
+    <orderEntry type="library" name="poi-ooxml-schemas-3.17" level="project" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$USER_HOME$/Desktop/poi-3.17/poi-3.17.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$USER_HOME$/Desktop/poi-3.17/poi-ooxml-3.17.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$USER_HOME$/Desktop/poi-3.17/poi-ooxml-schemas-3.17.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
   </component>
 </module>
