@@ -2,6 +2,8 @@
 import org.knowm.xchart.QuickChart;
 import org.knowm.xchart.SwingWrapper;
 import org.knowm.xchart.XYChart;
+import sun.security.krb5.internal.crypto.Des;
+
 import java.util.Arrays;
 
 import java.io.BufferedReader;
@@ -18,7 +20,7 @@ public class Main {
 
         int Fs = 100;
         int sizeOfArray = 512;
-        CSVReader csvReader = new CSVReader();
+        CSV csv = new CSV();
         Filtration filtration = new Filtration();
         InitialPeriodicMotionDetector initDetector = new InitialPeriodicMotionDetector(Fs, sizeOfArray);
         RepetitiveMotionDetector repDetector = new RepetitiveMotionDetector(initDetector.getFirstPeriodicMovement());
@@ -48,8 +50,16 @@ public class Main {
         double[] rollpre = new double[sizeOfArray * 5]; //DOWNSAMPLE1: remove *5
         double[] yawpre = new double[sizeOfArray * 5]; //DOWNSAMPLE1: remove *5
 
-        int Index;
-        double Angle;
+        int Index = 0;
+        double Angle = 0.0;
+        int FirstRep = 0;
+
+        int capacity = 70;
+
+        String[] DesiredAngle = new String[capacity];
+        String[] ActualAngle = new String[capacity];
+        String[] Difference = new String[capacity];
+        String[] RepIn = new String[capacity];
 
         double[] newPoints = new double[3];
         double idealAngle;
@@ -117,7 +127,8 @@ public class Main {
             yawRolling[i] = yaw[i];
         }*/
 
-        while (file < 3) {
+        while (file < (capacity + 1)) {
+            System.out.print("File: " + file + "\n");
             while (pitchpre[0] != 0 || indexOffset < 3) {
                 for (int i = 0; i < (sizeOfArray); i++) {
                     time[i] += timeFactor;
@@ -154,7 +165,7 @@ public class Main {
                 rollpre = shiftArray(rollpre, (sizeOfArray * 5));//DOWNSAMPLE1:remove the *5
                 yawpre = shiftArray(yawpre, (sizeOfArray * 5));//DOWNSAMPLE1:remove the *5
 
-                newPoints = csvReader.Read(indexOffset, file);
+                newPoints = csv.Read(indexOffset, file);
                 pitchpre[0] = newPoints[0];
                 pitchRolling = filtration.Filter(pitchpre, sizeOfArray, "pitch")[0];
                 pitchfiltered = filtration.Filter(pitchpre, sizeOfArray, "pitch")[1];
@@ -189,6 +200,11 @@ public class Main {
                 if (initDetector.isPeriodic(pitchRolling, rollRolling, yawRolling)) {
                     if (change == 0) {
                         change = 1;
+                        if(FirstRep == 0) {
+                            Index = indexOffset;
+                            System.out.println("PERIODIC in " + initDetector.getPeakDetected() + " direction at index " + Index);
+                        }
+                        FirstRep = 1;
                         if (initDetector.getPeakDetected() == "Pitch")
                             Angle = 1.0;
                         else if (initDetector.getPeakDetected() == "Roll")
@@ -197,8 +213,6 @@ public class Main {
                             Angle = 3.0;
                         else
                             Angle = 0.0;
-                        Index = indexOffset;
-                        System.out.println("PERIODIC in " + Double.toString(Angle) + " direction at index " + Index);
                     }
                     yawFreqMag = initDetector.getYawFreq();
                     double[] firstRep = initDetector.getFirstPeriodicMovement();
@@ -210,7 +224,8 @@ public class Main {
                 } else {
                     if (change == 1) {
                         change = 0;
-                        System.out.println("NOT PERIODIC at the index " + indexOffset);
+                        Angle = 0.0;
+                        //System.out.println("NOT PERIODIC at the index " + indexOffset);
 
                     }
                 }
@@ -248,14 +263,60 @@ public class Main {
             chart.updateXYSeries("Yaw", rawtime, yawpre, null);
             sw.repaintChart(); */
             }
-            idealAngle = csvReader.SignificantAngle(file);
+            idealAngle = csv.SignificantAngle(file);
+            DesiredAngle[(file - 1)] = Double.toString(idealAngle);
+            if (Angle == 0 ){
+                Difference[(file-1)] = "4";
+            }
+            else{
+                Difference[(file-1)] = Double.toString(Math.abs(Angle - idealAngle));
+            }
+            ActualAngle[(file -1)] = Double.toString(Angle);
+
+            if(Index == 0){
+                int index = csv.getReps(file, 0);
+                if (index != 0){
+                    RepIn[(file-1)] = "100"; //No Periodicity Detected Incorrectly
+                }
+                RepIn[(file-1)] = "1000"; //No Periodicity Detected Correctly
+            }
+            else {
+                for (int j = 0; j < 10; j++) {
+                    int index = csv.getReps(file, j);
+                    //System.out.print("iNDEX " + index + " INDEX " + Index + " j " + j + "\n");
+                    if (index == 0 && j == 0){
+                        if(Index !=0) {
+                            RepIn[(file - 1)] = "10000"; //Periodicity detected when shouldn't be
+                        }
+                        else
+                            RepIn[(file - 1)] = "100000"; //Should be random
+                        j = 10;
+                    }
+                    else if ((index > Index)) {
+                        RepIn[(file - 1)] = Integer.toString(j);
+                        j = 10;
+                    }
+                    else if (j > 0 && index == 0){
+                        RepIn[(file - 1)] = "1000000"; //Too Late
+                        j = 10;
+                    }
+                }
+            }
+            //DesiredAngle[(file-1)] = "1.0";
+            //ActualAngle[(file-1)] = "1.0";
+            //Difference[(file-1)] = "1.0";
+            //RepIn[(file-1)] = "1.0";
+
             file++;
             indexOffset = 1;
+            FirstRep = 0;
             change = 0;
+            Index = 0;
             Arrays.fill(pitchpre, 0.0);
             Arrays.fill(rollpre, 0.0);
             Arrays.fill(yawpre, 0.0);
         }
+        csv.Write(DesiredAngle,ActualAngle,Difference,RepIn,capacity);
 
     }
 
