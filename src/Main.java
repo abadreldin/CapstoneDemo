@@ -50,7 +50,7 @@ public class Main {
         double[] rollpre = new double[sizeOfArray * 5]; //DOWNSAMPLE1: remove *5
         double[] yawpre = new double[sizeOfArray * 5]; //DOWNSAMPLE1: remove *5
 
-        int Index = 0;
+        int ActualIndex = 0;
         double Angle = 0.0;
         int FirstRep = 0;
 
@@ -201,8 +201,8 @@ public class Main {
                     if (change == 0) {
                         change = 1;
                         if(FirstRep == 0) {
-                            Index = indexOffset;
-                            System.out.println("PERIODIC in " + initDetector.getPeakDetected() + " direction at index " + Index);
+                            ActualIndex = indexOffset;
+                            System.out.println("PERIODIC in " + initDetector.getPeakDetected() + " direction at index " + ActualIndex);
                         }
                         FirstRep = 1;
                         if (initDetector.getPeakDetected() == "Pitch")
@@ -273,31 +273,31 @@ public class Main {
             }
             ActualAngle[(file -1)] = Double.toString(Angle);
 
-            if(Index == 0){
-                int index = csv.getReps(file, 0);
-                if (index != 0){
-                    RepIn[(file-1)] = "100"; //No Periodicity Detected Incorrectly
+            //Repetition Statistics
+
+            if(ActualIndex == 0){ //No periodicity detected
+                int desiredIndex = csv.getReps(file, 0);
+                if (desiredIndex != 0){
+                    RepIn[(file-1)] = "100"; //Shouldn't be Random
                 }
-                RepIn[(file-1)] = "1000"; //No Periodicity Detected Correctly
+                else
+                    RepIn[(file-1)] = "1000"; //No Periodicity Detected Correctly
             }
-            else {
+            else { //Periodicity was detected
                 for (int j = 0; j < 10; j++) {
-                    int index = csv.getReps(file, j);
+                    int desiredIndex = csv.getReps(file, j);
                     //System.out.print("iNDEX " + index + " INDEX " + Index + " j " + j + "\n");
-                    if (index == 0 && j == 0){
-                        if(Index !=0) {
-                            RepIn[(file - 1)] = "10000"; //Periodicity detected when shouldn't be
-                        }
-                        else
-                            RepIn[(file - 1)] = "100000"; //Should be random
+                    if (desiredIndex == 0 && j == 0){
+                       RepIn[(file - 1)] = "10000"; //Periodicity detected when motion was random
+
                         j = 10;
                     }
-                    else if ((index > Index)) {
+                    else if ((desiredIndex > ActualIndex)) {
                         RepIn[(file - 1)] = Integer.toString(j);
                         j = 10;
                     }
-                    else if (j > 0 && index == 0){
-                        RepIn[(file - 1)] = "1000000"; //Too Late
+                    else if (j > 0 && desiredIndex == 0){
+                        RepIn[(file - 1)] = "100000"; //Detected After all reps complete
                         j = 10;
                     }
                 }
@@ -311,7 +311,7 @@ public class Main {
             indexOffset = 1;
             FirstRep = 0;
             change = 0;
-            Index = 0;
+            ActualIndex = 0;
             Arrays.fill(pitchpre, 0.0);
             Arrays.fill(rollpre, 0.0);
             Arrays.fill(yawpre, 0.0);

@@ -89,7 +89,7 @@ public class Filtration {
         }
 
         else if (alreadyFlipped == 2) {
-            if ((lastVal < 0) && (currVal < 300)){
+            if ((lastVal < 0) && (currVal < 100)){
                 flip = 0;
             }
             else
