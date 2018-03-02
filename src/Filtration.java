@@ -106,28 +106,28 @@ public class Filtration {
             //filtered_data = Convolution(pitchB, data);
         }
 
-       /* else if (angle == "roll") {
-            roll_flip = FlipCheck(data, roll_flip);
+        else if (angle == "roll") {
+            roll_flip = FlipCheckArrayList(data, roll_flip);
             if (roll_flip == 1) {
-                data[0] = data[0] + 360;
+                data.add(0,data.get(0) + 360);
             }
             if (roll_flip == 2) {
-                data[0] = (360 - data[0]) * -1;
+                data.add(0,(360 - data.get(0)) * -1);
             }
-            filtered_data = Convolution(rollB, data);
+            //filtered_data = Convolution(rollB, data);
         }
 
         else if (angle == "yaw") {
-            yaw_flip = FlipCheck(data, yaw_flip);
+            yaw_flip = FlipCheckArrayList(data, yaw_flip);
             if (yaw_flip == 1) {
-                data[0] = data[0] + 360;
+                data.add(0,data.get(0) + 360);
             }
             if (yaw_flip == 2) {
-                data[0] = (360 - data[0]) * -1;
+                data.add(0,(360 - data.get(0)) * -1);
             }
-            filtered_data = Convolution(yawB, data);
+           // filtered_data = Convolution(yawB, data);
         }
-*/
+
         /*for (int i = 0; i < (capacity*5); i++){ //DOWNSAMPLE1: remove entire for loop DOWNSAMPLE2: remove entire for loop
             //for (int i = 0; i < (capacity); i++){ //DOWNSAMPLE2: remove entire for loop
             if((i%5) == 0){
@@ -152,6 +152,46 @@ public class Filtration {
         int flip; //this returned, 0 is false, 1 is true
         double lastVal = data[i + 1];
         double currVal = data[i];
+
+        //if the data is already flipped we are checking for the point when the current angle is
+        //less than 360 and the last was over 360
+        if (alreadyFlipped == 1) {  //alreadyFlipped is passed in
+            if ((lastVal > 360) && (currVal > 300))
+                flip = 0; //if it is no longer flipped, we return false
+            else
+                flip = 1; //otherwise we return true
+        }
+
+        else if (alreadyFlipped == 2) {
+            if ((lastVal < 0) && (currVal < 100)){
+                flip = 0;
+            }
+            else
+                flip = 2;
+        }
+        //if the last point was not flipped then we are checking if the last point was over 300
+        //and the current is under 50--> I can show all this logic graphically if it's confusing
+        else {
+            if ((lastVal > 300) && (currVal < 50)) {
+                flip = 1;
+            }
+
+            else if ((lastVal < 50) && (currVal > 300)){
+                flip = 2;
+            }
+
+            else
+                flip = 0;
+        }
+
+        return flip; //basically returning a true or false on whether the data is still flipped
+    }
+
+    public static int FlipCheckArrayList(ArrayList<Double> data, int alreadyFlipped) {
+        int i = 0; //this is used as an index to get the previous data point and current
+        int flip; //this returned, 0 is false, 1 is true
+        double lastVal = data.get(i + 1);
+        double currVal = data.get(i);
 
         //if the data is already flipped we are checking for the point when the current angle is
         //less than 360 and the last was over 360

@@ -56,9 +56,13 @@ public class Main {
         ArrayList<Double> test = new ArrayList<Double>();
 
         ArrayList<Double> pitch = new ArrayList<Double>();
+        ArrayList<Double> roll = new ArrayList<Double>();
+        ArrayList<Double> yaw = new ArrayList<Double>();
 
         for(int i=0; i < sizeOfArray; i++){
             pitch.add(0.0);
+            roll.add(0.0);
+            yaw.add(0.0);
         }
 
         test.add(1.38);
@@ -184,21 +188,27 @@ public class Main {
 
                 //pitchpre = shiftArray(pitchpre, (sizeOfArray * 5));//DOWNSAMPLE1:remove the *5
                 pitch.remove(sizeOfArray - 1);
-                rollpre = shiftArray(rollpre, (sizeOfArray * 5));//DOWNSAMPLE1:remove the *5
-                yawpre = shiftArray(yawpre, (sizeOfArray * 5));//DOWNSAMPLE1:remove the *5
+                roll.remove(sizeOfArray - 1);
+                yaw.remove(sizeOfArray - 1);
+                //rollpre = shiftArray(rollpre, (sizeOfArray * 5));//DOWNSAMPLE1:remove the *5
+                //yawpre = shiftArray(yawpre, (sizeOfArray * 5));//DOWNSAMPLE1:remove the *5
 
                 newPoints = csv.Read(indexOffset, file);
                 pitch.add(0, newPoints[0]);
-                System.out.print("New Pitch: " + newPoints[0] + "\n");
+                roll.add(0, newPoints[1]);
+                yaw.add(0, newPoints[2]);
+                System.out.print("New Pitch: " + newPoints[1] + "\n");
                 System.out.print("Pre Pitch: ");
-                for(int i= 0; i < pitch.size(); i++) {
-                    System.out.print(pitch.get(i));
+                for(int i= 0; i < roll.size(); i++) {
+                    System.out.print(roll.get(i));
                 }
                 System.out.print("\n");
                 pitch = filtration.PitchFilter(pitch, sizeOfArray, "pitch");
+                roll = filtration.PitchFilter(roll, sizeOfArray, "roll");
+                yaw = filtration.PitchFilter(yaw, sizeOfArray, "yaw");
                 System.out.print("Post Pitch: ");
-                for(int i= 0; i < pitch.size(); i++) {
-                    System.out.print(pitch.get(i));
+                for(int i= 0; i < roll.size(); i++) {
+                    System.out.print(roll.get(i));
                 }
                 System.out.print("\n");
 
