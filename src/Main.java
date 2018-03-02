@@ -6,6 +6,9 @@ import sun.security.krb5.internal.crypto.Des;
 
 import java.util.Arrays;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -49,6 +52,24 @@ public class Main {
         double[] pitchpre = new double[sizeOfArray * 5]; //DOWNSAMPLE1: remove *5
         double[] rollpre = new double[sizeOfArray * 5]; //DOWNSAMPLE1: remove *5
         double[] yawpre = new double[sizeOfArray * 5]; //DOWNSAMPLE1: remove *5
+
+        ArrayList<Double> test = new ArrayList<Double>();
+
+        ArrayList<Double> pitch = new ArrayList<Double>();
+
+        for(int i=0; i < sizeOfArray; i++){
+            pitch.add(0.0);
+        }
+
+        test.add(1.38);
+        test.add(2.56);
+        test.add(4.3);
+
+        System.out.print("Test: ");
+        for(int i= 0; i < test.size(); i++) {
+            System.out.print(test.get(i));
+        }
+        System.out.print("\n");
 
         int ActualIndex = 0;
         double Angle = 0.0;
@@ -129,7 +150,7 @@ public class Main {
 
         while (file < (capacity + 1)) {
             System.out.print("File: " + file + "\n");
-            while (pitchpre[0] != 0 || indexOffset < 3) {
+            while (pitch.get(0) != 0 || indexOffset < 3) {
                 for (int i = 0; i < (sizeOfArray); i++) {
                     time[i] += timeFactor;
                 }
@@ -161,14 +182,28 @@ public class Main {
                 //rollpre = shiftArray(rollpre, (sizeOfArray));
                 //yawpre = shiftArray(yawpre, (sizeOfArray));
 
-                pitchpre = shiftArray(pitchpre, (sizeOfArray * 5));//DOWNSAMPLE1:remove the *5
+                //pitchpre = shiftArray(pitchpre, (sizeOfArray * 5));//DOWNSAMPLE1:remove the *5
+                pitch.remove(sizeOfArray - 1);
                 rollpre = shiftArray(rollpre, (sizeOfArray * 5));//DOWNSAMPLE1:remove the *5
                 yawpre = shiftArray(yawpre, (sizeOfArray * 5));//DOWNSAMPLE1:remove the *5
 
                 newPoints = csv.Read(indexOffset, file);
-                pitchpre[0] = newPoints[0];
-                pitchRolling = filtration.Filter(pitchpre, sizeOfArray, "pitch")[0];
-                pitchfiltered = filtration.Filter(pitchpre, sizeOfArray, "pitch")[1];
+                pitch.add(0, newPoints[0]);
+                System.out.print("New Pitch: " + newPoints[0] + "\n");
+                System.out.print("Pre Pitch: ");
+                for(int i= 0; i < pitch.size(); i++) {
+                    System.out.print(pitch.get(i));
+                }
+                System.out.print("\n");
+                pitch = filtration.PitchFilter(pitch, sizeOfArray, "pitch");
+                System.out.print("Post Pitch: ");
+                for(int i= 0; i < pitch.size(); i++) {
+                    System.out.print(pitch.get(i));
+                }
+                System.out.print("\n");
+
+                //pitchRolling = filtration.PitchFilter(pitchpre, sizeOfArray, "pitch")[0];
+                //pitchfiltered = filtration.PitchFilter(pitchpre, sizeOfArray, "pitch")[1];
             /*System.out.print("Filtered: ");
             for(int i = 0; i < sizeOfArray; i++){
                 System.out.print(pitchfiltered[i] + ", ");
@@ -316,7 +351,7 @@ public class Main {
             Arrays.fill(rollpre, 0.0);
             Arrays.fill(yawpre, 0.0);
         }
-        csv.Write(DesiredAngle,ActualAngle,Difference,RepIn,capacity);
+        //csv.Write(DesiredAngle,ActualAngle,Difference,RepIn,capacity);
 
     }
 
