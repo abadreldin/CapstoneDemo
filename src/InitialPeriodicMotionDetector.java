@@ -1,3 +1,4 @@
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class InitialPeriodicMotionDetector {
@@ -22,6 +23,7 @@ public class InitialPeriodicMotionDetector {
     public String getPeakDetected(){
         return this.peakDetected;
     }
+
 
     public double[] getFirstPeriodicMovement(){
         return firstPeriodicMovement;

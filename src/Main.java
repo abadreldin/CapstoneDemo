@@ -26,6 +26,7 @@ public class Main {
         CSV csv = new CSV();
         Filtration filtration = new Filtration();
         InitialPeriodicMotionDetector initDetector = new InitialPeriodicMotionDetector(Fs, sizeOfArray);
+        InitialPeriodicMotionDetectorArrayList initDetectorList = new InitialPeriodicMotionDetectorArrayList(Fs, sizeOfArray);
         RepetitiveMotionDetector repDetector = new RepetitiveMotionDetector(initDetector.getFirstPeriodicMovement());
 
 
@@ -198,20 +199,20 @@ public class Main {
                 roll.add(0, newPoints[1]);
                 yaw.add(0, newPoints[2]);
 
-                System.out.print("New Pitch: " + newPoints[1] + "\n");
+               /* System.out.print("New Pitch: " + newPoints[1] + "\n");
                 System.out.print("Pre Pitch: ");
                 for(int i= 0; i < roll.size(); i++) {
                     System.out.print(roll.get(i));
                 }
-                System.out.print("\n");
+                System.out.print("\n");*/
                 pitch = filtration.PitchFilter(pitch, sizeOfArray, "pitch");
                 roll = filtration.PitchFilter(roll, sizeOfArray, "roll");
                 yaw = filtration.PitchFilter(yaw, sizeOfArray, "yaw");
-                System.out.print("Post Pitch: ");
+                /*System.out.print("Post Pitch: ");
                 for(int i= 0; i < roll.size(); i++) {
                     System.out.print(roll.get(i));
                 }
-                System.out.print("\n");
+                System.out.print("\n");*/
 
                 //pitchRolling = filtration.PitchFilter(pitchpre, sizeOfArray, "pitch")[0];
                 //pitchfiltered = filtration.PitchFilter(pitchpre, sizeOfArray, "pitch")[1];
@@ -275,6 +276,10 @@ public class Main {
 
                     }
                 }
+
+                if(initDetectorList.isPeriodic(pitch, roll, yaw))
+                    System.out.println(indexOffset);
+
                 //System.out.println(indexOffset);
                 pitchFreqMag = initDetector.getPitchFreq();
                 rollFreqMag = initDetector.getRollFreq();

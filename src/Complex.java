@@ -3,8 +3,8 @@ public class Complex {
     private double im;   // the imaginary part
 
     public Complex(){
-        re = 0;
-        im = 0;
+        re = 0.0;
+        im = 0.0;
     }
 
     // create a new object with the given real and imaginary parts
