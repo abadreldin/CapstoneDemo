@@ -197,6 +197,7 @@ public class Main {
                 pitch.add(0, newPoints[0]);
                 roll.add(0, newPoints[1]);
                 yaw.add(0, newPoints[2]);
+
                 System.out.print("New Pitch: " + newPoints[1] + "\n");
                 System.out.print("Pre Pitch: ");
                 for(int i= 0; i < roll.size(); i++) {
