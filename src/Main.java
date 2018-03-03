@@ -277,6 +277,11 @@ public class Main {
                     }
                 }
 
+                //double peak = initDetectorList.getPeak();
+
+                System.out.print("FROM MAIN " + initDetectorList.getPeak() + "\n");
+                System.out.print("Is Periodic? " + initDetectorList.isPeriodic(pitch, roll, yaw) + "\n");
+
                 if(initDetectorList.isPeriodic(pitch, roll, yaw))
                     System.out.println(indexOffset);
 
