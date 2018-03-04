@@ -21,7 +21,7 @@ public class InitialPeriodicMotionDetectorArrayList {
     Complex[] dataPsiFrequency;
     double[] dataPsiFrequencySpectrum;
 
-    public double significantPeak;
+    private double significantPeak;
     private String peakDetected;
 
     public String getPeakDetected(){
@@ -177,7 +177,7 @@ public class InitialPeriodicMotionDetectorArrayList {
 
         //Determine the significant angle
         ArrayList<Double> movementDirection = (phiPeak > thetaPeak && phiPeak > psiPeak) ? dataPhiFrequencySpectrumList: (thetaPeak > phiPeak && thetaPeak > psiPeak) ? dataThetaFrequencySpectrumList: dataPsiFrequencySpectrumList;
-        significantPeak = (phiPeak > thetaPeak && phiPeak > psiPeak) ? phiPeak: (thetaPeak > phiPeak && thetaPeak > psiPeak) ? thetaPeak: psiPeak;
+        this.significantPeak = (phiPeak > thetaPeak && phiPeak > psiPeak) ? phiPeak: (thetaPeak > phiPeak && thetaPeak > psiPeak) ? thetaPeak: psiPeak;
         this.peakDetected = (phiPeak > thetaPeak && phiPeak > psiPeak) ? "Pitch" : (thetaPeak > phiPeak && thetaPeak > psiPeak) ? "Roll": "Yaw";
 
         //System.out.println(significantPeak);
@@ -241,13 +241,15 @@ public class InitialPeriodicMotionDetectorArrayList {
     private double findPeak(int currAngle){
         //Frequencies are in Hertz
         double peakVal = 0;
+        double factor = (double) Fs/ (double) arraySize;
+        double maxFrequency = 10;
         double locationOfPeak = 0;
         int smallestStart = 1;
         int countAboveThreshold = 0;
         double threshold = 130;
         switch(currAngle){
             case 1:
-                for(int i = smallestStart; i < arraySize; i++){
+                for(int i = smallestStart; i < (int)(maxFrequency/factor); i++){
                     if(this.dataPhiFrequencySpectrumList.get(i) > threshold){
                         countAboveThreshold++;
                         if(peakVal < this.dataPhiFrequencySpectrumList.get(i)){
@@ -258,7 +260,7 @@ public class InitialPeriodicMotionDetectorArrayList {
                 }
                 break;
             case 2:
-                for(int i = smallestStart; i < arraySize; i++){
+                for(int i = smallestStart; i < (int)(maxFrequency/factor); i++){
                     if(this.dataThetaFrequencySpectrumList.get(i) > threshold){
                         countAboveThreshold++;
                         if(peakVal < this.dataThetaFrequencySpectrumList.get(i)){
@@ -269,7 +271,7 @@ public class InitialPeriodicMotionDetectorArrayList {
                 }
                 break;
             case 3:
-                for(int i = smallestStart; i < arraySize; i++){
+                for(int i = smallestStart; i < (int)(maxFrequency/factor); i++){
                     if(this.dataPsiFrequencySpectrumList.get(i) > threshold){
                         countAboveThreshold++;
                         if(peakVal < this.dataPsiFrequencySpectrumList.get(i)){
@@ -328,51 +330,6 @@ public class InitialPeriodicMotionDetectorArrayList {
     Input: Complex data array
     Output: Complex data array
      */
-    public ArrayList<Complex> fft(ArrayList<Complex> x) {
-        int n = x.size();
-
-        // base case
-        if (n == 1) {
-            ArrayList<Complex> result = new ArrayList<Complex>();
-            result.add(0, x.get(0));
-            return result;
-        }
-
-        // radix 2 Cooley-Tukey FFT
-        if (n % 2 != 0) {
-            throw new IllegalArgumentException("n is not a power of 2");
-        }
-
-        // fft of even terms
-        //ArrayList<Complex> even = new Complex[n/2];
-        ArrayList<Complex> even = new ArrayList<Complex>();
-        for (int k = 0; k < n/2; k++) {
-            even.add(x.get(2*k));
-        }
-        ArrayList<Complex> q = fft(even);
-
-        // fft of odd terms
-        ArrayList<Complex> odd  = even;  // reuse the array
-        for (int k = 0; k < n/2; k++) {
-            odd.add(x.get(2*k + 1));
-        }
-        ArrayList<Complex> r = fft(odd);
-
-        // combine
-        ArrayList<Complex> y = new ArrayList<Complex>();
-        for(int i=0; i<n; i++){
-            y.add(new Complex());
-        }
-
-        for (int k = 0; k < n/2; k++) {
-            double kth = (double) (-2 * k * Math.PI / n);
-            Complex wk = new Complex((double)Math.cos(kth), (double)Math.sin(kth));
-            y.add(k, q.get(k).plus(wk.times(r.get(k))));
-            y.add(k + n/2, q.get(k).minus(wk.times(r.get(k))));
-        }
-        return y;
-    }
-
     public Complex[] fft(Complex[] x) {
         int n = x.length;
 

@@ -2,7 +2,7 @@
 import org.knowm.xchart.QuickChart;
 import org.knowm.xchart.SwingWrapper;
 import org.knowm.xchart.XYChart;
-import sun.security.krb5.internal.crypto.Des;
+
 
 import java.util.Arrays;
 
@@ -279,8 +279,8 @@ public class Main {
 
                 //double peak = initDetectorList.getPeak();
 
-                System.out.print("FROM MAIN " + initDetectorList.getPeak() + "\n");
-                System.out.print("Is Periodic? " + initDetectorList.isPeriodic(pitch, roll, yaw) + "\n");
+                System.out.print("Peak Frequency " + initDetectorList.getPeak() + "Hz\n");
+                System.out.print("Is Periodic? " + initDetectorList.isPeriodic(pitch, roll, yaw) + " in "+ initDetectorList.getPeakDetected() + " direction\n");
 
                 if(initDetectorList.isPeriodic(pitch, roll, yaw))
                     System.out.println(indexOffset);
