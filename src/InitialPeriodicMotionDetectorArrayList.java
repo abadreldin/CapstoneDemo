@@ -22,6 +22,7 @@ public class InitialPeriodicMotionDetectorArrayList {
     double[] dataPsiFrequencySpectrum;
 
     private double significantPeak;
+    private double magnitude;
     private String peakDetected;
 
     public String getPeakDetected(){
@@ -102,8 +103,12 @@ public class InitialPeriodicMotionDetectorArrayList {
         return arraySize;
     }
 
-    public double getPeak (){
+    public double getFreq (){
         return significantPeak;
+    }
+
+    public double getMag (){
+        return magnitude;
     }
 
     public boolean isPeriodic(ArrayList<Double> dataPhi, ArrayList<Double> dataTheta, ArrayList<Double> dataPsi) {
@@ -127,13 +132,17 @@ public class InitialPeriodicMotionDetectorArrayList {
         //Convert dataPhiComplexList back to an ArrayList of Complex type
 
         for(int i=0; i < arraySize; i ++){
-            this.dataPhiFrequencyList.add(this.dataPhiFrequency[i]);
+            this.dataPhiFrequencyList.add(i, this.dataPhiFrequency[i]);
         }
+
         //System.out.print("finished pitch");
 
 
         changeToFrequencySpectrum(1);
-        double phiPeak = findPeak(1);
+        double[] phi = findPeak(1);
+        //System.out.print("HEREE "+ phi[0] + " " + phi[1]);
+        double phiPeak = phi[1];
+        double phiMag = phi[0];
         //boolean resultPhi = findPeak2(1);
 
         //Analysis for Theta
@@ -153,7 +162,9 @@ public class InitialPeriodicMotionDetectorArrayList {
             this.dataThetaFrequencyList.add(this.dataThetaFrequency[i]);
         }
         changeToFrequencySpectrum(2);
-        double thetaPeak = findPeak(2);
+        double[] theta = findPeak(2);
+        double thetaPeak = theta[1];
+        double thetaMag = theta[0];
 
        // System.out.print("finished roll");
 
@@ -171,14 +182,36 @@ public class InitialPeriodicMotionDetectorArrayList {
         for(int i=0; i < arraySize; i ++){
             this.dataPsiFrequencyList.add(this.dataPsiFrequency[i]);
         }
+        /*for(int i = 0; i < arraySize; i++) {
+            System.out.print(this.dataPhiFrequencyList.get(i) + ", ");
+        }
+        System.out.print("\n");*/
         changeToFrequencySpectrum(3);
-        double psiPeak = findPeak(3);
+        double[] psi = findPeak(3);
+        double psiPeak = psi[1];
+        //double psiPeak[] = findPeak(3);
+        double psiMag = psi[0];
+       // System.out.print(" PHI PEAK: " + phiPeak +" THETA PEAK: " + thetaPeak + " PSI PEAK: " + psiPeak +"\n");
         //boolean resultPsi =  findPeak2(3);
 
         //Determine the significant angle
         ArrayList<Double> movementDirection = (phiPeak > thetaPeak && phiPeak > psiPeak) ? dataPhiFrequencySpectrumList: (thetaPeak > phiPeak && thetaPeak > psiPeak) ? dataThetaFrequencySpectrumList: dataPsiFrequencySpectrumList;
-        this.significantPeak = (phiPeak > thetaPeak && phiPeak > psiPeak) ? phiPeak: (thetaPeak > phiPeak && thetaPeak > psiPeak) ? thetaPeak: psiPeak;
-        this.peakDetected = (phiPeak > thetaPeak && phiPeak > psiPeak) ? "Pitch" : (thetaPeak > phiPeak && thetaPeak > psiPeak) ? "Roll": "Yaw";
+        if(phiPeak > thetaPeak && phiPeak > psiPeak) {
+            this.significantPeak = phiPeak;
+            this.magnitude = phiMag;
+            this.peakDetected = "Pitch";
+        }
+        else if(thetaPeak > phiPeak && thetaPeak > psiPeak) {
+            this.significantPeak = thetaPeak;
+            this.magnitude = thetaMag;
+            this.peakDetected = "Roll";
+        }
+        else if (psiPeak != 0.0){
+            this.significantPeak = psiPeak;
+            this.magnitude = psiMag;
+            this.peakDetected = "Yaw";
+        }
+        //System.out.println("SIG PEAK: " + this.significantPeak);
 
         //System.out.println(significantPeak);
 
@@ -187,7 +220,7 @@ public class InitialPeriodicMotionDetectorArrayList {
             return true;
         }*/
 
-        if(significantPeak > 0){
+        if(significantPeak > 0 && magnitude > 10){
             //find the relative time domain peak in that data set
             //Will use function from RepetitiveMotionPeriodicDetector to find rep of new periodic movement and fill that value into firstPeriodicMovement
             //double[] firstPeriodicMovement;
@@ -238,18 +271,39 @@ public class InitialPeriodicMotionDetectorArrayList {
     Input: array that contains the frequency spectrum and respective magnitudes
     Output: peak value
      */
-    private double findPeak(int currAngle){
+    private double[] findPeak(int currAngle){
         //Frequencies are in Hertz
+        double magnitude = 0;
         double peakVal = 0;
         double factor = (double) Fs/ (double) arraySize;
-        double maxFrequency = 10;
+        double delta_f = 0.04625;
+        int maxIndex = (int)((0.5/delta_f)+1);//(100 + (arraySize/2)); //0.01*100 = 1Hz
+        int minIndex = (int) (0.2/delta_f);
         double locationOfPeak = 0;
         int smallestStart = 1;
         int countAboveThreshold = 0;
         double threshold = 130;
+
+        int min = maxIndex;
         switch(currAngle){
             case 1:
-                for(int i = smallestStart; i < (int)(maxFrequency/factor); i++){
+                for(int i = 1; i <maxIndex; i++) {
+                    if (this.dataPhiFrequencySpectrumList.get(i) > this.dataPhiFrequencySpectrumList.get(i - 1)) {
+                        min = i;
+                        break;
+                    }
+                }
+                if(min > minIndex){
+                    for(int i=min;i<maxIndex;i++){
+                        if(this.dataPhiFrequencySpectrumList.get(i) < this.dataPhiFrequencySpectrumList.get(i-1)){
+                            peakVal = (i*delta_f);
+                            magnitude = this.dataPhiFrequencySpectrumList.get(i);
+                            break;
+                        }
+                    }
+                }
+                break;
+               /*for(int i = smallestStart; i < (int)(maxFrequency/factor); i++){
                     if(this.dataPhiFrequencySpectrumList.get(i) > threshold){
                         countAboveThreshold++;
                         if(peakVal < this.dataPhiFrequencySpectrumList.get(i)){
@@ -258,9 +312,25 @@ public class InitialPeriodicMotionDetectorArrayList {
                         }
                     }
                 }
-                break;
+                break;*/
             case 2:
-                for(int i = smallestStart; i < (int)(maxFrequency/factor); i++){
+                for(int i = 1; i <maxIndex; i++) {
+                    if (this.dataThetaFrequencySpectrumList.get(i) > this.dataThetaFrequencySpectrumList.get(i - 1)) {
+                        min = i;
+                        break;
+                    }
+                }
+                if(min > minIndex){
+                    for(int i=min;i<maxIndex;i++){
+                        if(this.dataThetaFrequencySpectrumList.get(i) < this.dataThetaFrequencySpectrumList.get(i-1)){
+                            peakVal = (i*delta_f);
+                            magnitude = this.dataThetaFrequencySpectrumList.get(i);
+                            break;
+                        }
+                    }
+                }
+                break;
+                /*for(int i = smallestStart; i < (int)(maxFrequency/factor); i++){
                     if(this.dataThetaFrequencySpectrumList.get(i) > threshold){
                         countAboveThreshold++;
                         if(peakVal < this.dataThetaFrequencySpectrumList.get(i)){
@@ -269,9 +339,29 @@ public class InitialPeriodicMotionDetectorArrayList {
                         }
                     }
                 }
-                break;
+                break;*/
             case 3:
-                for(int i = smallestStart; i < (int)(maxFrequency/factor); i++){
+                for(int i = 1; i <maxIndex; i++) {
+                    if (this.dataPsiFrequencySpectrumList.get(i) > this.dataPsiFrequencySpectrumList.get(i - 1)) {
+                        min = i;
+                        //System.out.print("Iteration: "+ Double.toString(this.dataPsiFrequencySpectrumList.get(0)) + " MIN: " + min);
+                        break;
+                    }
+                }
+                //System.out.print("MIN:" + min + " CurrAngle: " + currAngle + "\n");
+                if(min > minIndex){
+                    for(int i=min;i<maxIndex;i++){
+                        if(this.dataPsiFrequencySpectrumList.get(i) < this.dataPsiFrequencySpectrumList.get(i-1)){
+                            peakVal = (i*delta_f);
+                            magnitude = this.dataPsiFrequencySpectrumList.get(i);
+                            //System.out.print(" MAX: " + i + " Peak Val: " + peakVal + "Mag: " + magnitude + "\n");
+                            //System.out.print("MIN:" + min + " CurrAngle: " + peakVal + "\n");
+                            break;
+                        }
+                    }
+                }
+                break;
+                /*for(int i = smallestStart; i < (int)(maxFrequency/factor); i++){
                     if(this.dataPsiFrequencySpectrumList.get(i) > threshold){
                         countAboveThreshold++;
                         if(peakVal < this.dataPsiFrequencySpectrumList.get(i)){
@@ -280,12 +370,16 @@ public class InitialPeriodicMotionDetectorArrayList {
                         }
                     }
                 }
-                break;
+                break;*/
         }
         //System.out.println("Maximum frequency power is: " + peakVal + " and number of values above power frequency of 30 are: " + countAboveThreshold);
         //return peakVal;
-        //System.out.println("Peak at " + locationOfPeak + " Hz");
-        return locationOfPeak;
+        double arrayout[] = {magnitude, peakVal};
+       /* if (currAngle == 3) {
+            System.out.println("Peak at " + peakVal + " Hz " + currAngle + " Mag " + magnitude);
+            System.out.print("ARRAY OUT: " + arrayout[0] + " " + arrayout[1] + "\n");
+        }*/
+        return arrayout;
     }
 
 
@@ -320,6 +414,11 @@ public class InitialPeriodicMotionDetectorArrayList {
                     //System.out.println(dataFrequencySpectrum[i]);
                     //System.out.println("Current frequency power is: " + dataFrequencySpectrum[i] + " n: " + (i) + " and frequency is: " + factor*i + "Hz");
                 }
+               /* System.out.print("Spec: ");
+                for(int i = 0; i < arraySize; i++) {
+                    System.out.print(this.dataPsiFrequencySpectrumList.get(i) + ", ");
+                }
+                System.out.print("\n");*/
                 break;
         }
     }
@@ -332,6 +431,7 @@ public class InitialPeriodicMotionDetectorArrayList {
      */
     public Complex[] fft(Complex[] x) {
         int n = x.length;
+       // System.out.println("N: " + n);
 
         // base case
         if (n == 1) return new Complex[] { x[0] };

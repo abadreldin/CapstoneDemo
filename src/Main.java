@@ -27,7 +27,7 @@ public class Main {
         Filtration filtration = new Filtration();
         InitialPeriodicMotionDetector initDetector = new InitialPeriodicMotionDetector(Fs, sizeOfArray);
         InitialPeriodicMotionDetectorArrayList initDetectorList = new InitialPeriodicMotionDetectorArrayList(Fs, sizeOfArray);
-        RepetitiveMotionDetector repDetector = new RepetitiveMotionDetector(initDetector.getFirstPeriodicMovement());
+        RepetitiveMotionDetector repetitiveMotionDetector = new RepetitiveMotionDetector();
 
 
         System.out.println(initDetector.getArraySize());
@@ -54,8 +54,6 @@ public class Main {
         double[] rollpre = new double[sizeOfArray * 5]; //DOWNSAMPLE1: remove *5
         double[] yawpre = new double[sizeOfArray * 5]; //DOWNSAMPLE1: remove *5
 
-        ArrayList<Double> test = new ArrayList<Double>();
-
         ArrayList<Double> pitch = new ArrayList<Double>();
         ArrayList<Double> roll = new ArrayList<Double>();
         ArrayList<Double> yaw = new ArrayList<Double>();
@@ -66,21 +64,13 @@ public class Main {
             yaw.add(0.0);
         }
 
-        test.add(1.38);
-        test.add(2.56);
-        test.add(4.3);
-
-        System.out.print("Test: ");
-        for(int i= 0; i < test.size(); i++) {
-            System.out.print(test.get(i));
-        }
-        System.out.print("\n");
 
         int ActualIndex = 0;
         double Angle = 0.0;
         int FirstRep = 0;
+        int n = 0;
 
-        int capacity = 70;
+        int capacity = 1;
 
         String[] DesiredAngle = new String[capacity];
         String[] ActualAngle = new String[capacity];
@@ -89,6 +79,10 @@ public class Main {
 
         double[] newPoints = new double[3];
         double idealAngle;
+
+        long prevUpdate = -1;
+        boolean newlyPeriodic = true;
+        int RepCount = 0;
 
         double[] freqHz = {0.05,0.39,0.59,0.78,0.98,1.17,1.37,1.56,1.76,1.95,2.15,2.34,2.54,2.73,2.93,3.13,3.32,3.52,3.71,3.91,4.10,4.30,4.49,4.69,4.88,5.08,5.27,5.47,5.66,5.86,6.05,6.25,6.45,6.64,6.84,7.03,7.23,7.42,7.62,7.81,8.01,8.20,8.40,8.59,8.79,8.98,9.18,9.38,9.57,9.77,9.96,10.16,10.35,10.55,10.74,10.94,11.13,11.33,11.52,11.72,11.91,12.11,12.30,12.50,12.70,12.89,13.09,13.28,13.48,13.67,13.87,14.06,14.26,14.45,14.65,14.84,15.04,15.23,15.43,15.63,15.82,16.02,16.21,16.41,16.60,16.80,16.99,17.19,17.38,17.58,17.77,17.97,18.16,18.36,18.55,18.75,18.95,19.14,19.34,19.53,19.73,19.92,20.12,20.31,20.51,20.70,20.90,21.09,21.29,21.48,21.68,21.88,22.07,22.27,22.46,22.66,22.85,23.05,23.24,23.44,23.63,23.83,24.02,24.22,24.41,24.61,24.80,25.00,25.20,25.39,25.59,25.78,25.98,26.17,26.37,26.56,26.76,26.95,27.15,27.34,27.54,27.73,27.93,28.13,28.32,28.52,28.71,28.91,29.10,29.30,29.49,29.69,29.88,30.08,30.27,30.47,30.66,30.86,31.05,31.25,31.45,31.64,31.84,32.03,32.23,32.42,32.62,32.81,33.01,33.20,33.40,33.59,33.79,33.98,34.18,34.38,34.57,34.77,34.96,35.16,35.35,35.55,35.74,35.94,36.13,36.33,36.52,36.72,36.91,37.11,37.30,37.50,37.70,37.89,38.09,38.28,38.48,38.67,38.87,39.06,39.26,39.45,39.65,39.84,40.04,40.23,40.43,40.63,40.82,41.02,41.21,41.41,41.60,41.80,41.99,42.19,42.38,42.58,42.77,42.97,43.16,43.36,43.55,43.75,43.95,44.14,44.34,44.53,44.73,44.92,45.12,45.31,45.51,45.70,45.90,46.09,46.29,46.48,46.68,46.88,47.07,47.27,47.46,47.66,47.85,48.05,48.24,48.44,48.63,48.83,49.02,49.22,49.41,49.61,49.80,50.00,50.20,50.39,50.59,50.78,50.98,51.17,51.37,51.56,51.76,51.95,52.15,52.34,52.54,52.73,52.93,53.13,53.32,53.52,53.71,53.91,54.10,54.30,54.49,54.69,54.88,55.08,55.27,55.47,55.66,55.86,56.05,56.25,56.45,56.64,56.84,57.03,57.23,57.42,57.62,57.81,58.01,58.20,58.40,58.59,58.79,58.98,59.18,59.38,59.57,59.77,59.96,60.16,60.35,60.55,60.74,60.94,61.13,61.33,61.52,61.72,61.91,62.11,62.30,62.50,62.70,62.89,63.09,63.28,63.48,63.67,63.87,64.06,64.26,64.45,64.65,64.84,65.04,65.23,65.43,65.63,65.82,66.02,66.21,66.41,66.60,66.80,66.99,67.19,67.38,67.58,67.77,67.97,68.16,68.36,68.55,68.75,68.95,69.14,69.34,69.53,69.73,69.92,70.12,70.31,70.51,70.70,70.90,71.09,71.29,71.48,71.68,71.88,72.07,72.27,72.46,72.66,72.85,73.05,73.24,73.44,73.63,73.83,74.02,74.22,74.41,74.61,74.80,75.00,75.20,75.39,75.59,75.78,75.98,76.17,76.37,76.56,76.76,76.95,77.15,77.34,77.54,77.73,77.93,78.13,78.32,78.52,78.71,78.91,79.10,79.30,79.49,79.69,79.88,80.08,80.27,80.47,80.66,80.86,81.05,81.25,81.45,81.64,81.84,82.03,82.23,82.42,82.62,82.81,83.01,83.20,83.40,83.59,83.79,83.98,84.18,84.38,84.57,84.77,84.96,85.16,85.35,85.55,85.74,85.94,86.13,86.33,86.52,86.72,86.91,87.11,87.30,87.50,87.70,87.89,88.09,88.28,88.48,88.67,88.87,89.06,89.26,89.45,89.65,89.84,90.04,90.23,90.43,90.63,90.82,91.02,91.21,91.41,91.60,91.80,91.99,92.19,92.38,92.58,92.77,92.97,93.16,93.36,93.55,93.75,93.95,94.14,94.34,94.53,94.73,94.92,95.12,95.31,95.51,95.70,95.90,96.09,96.29,96.48,96.68,96.88,97.07,97.27,97.46,97.66,97.85,98.05,98.24,98.44,98.63,98.83,99.02,99.22,99.41,99.61,99.80,100.00};
         int indexOffset = 1;
@@ -249,7 +243,7 @@ public class Main {
                         change = 1;
                         if(FirstRep == 0) {
                             ActualIndex = indexOffset;
-                            System.out.println("PERIODIC in " + initDetector.getPeakDetected() + " direction at index " + ActualIndex);
+                         //   System.out.println("PERIODIC in " + initDetector.getPeakDetected() + " direction at index " + ActualIndex);
                         }
                         FirstRep = 1;
                         if (initDetector.getPeakDetected() == "Pitch")
@@ -279,11 +273,47 @@ public class Main {
 
                 //double peak = initDetectorList.getPeak();
 
-                System.out.print("Peak Frequency " + initDetectorList.getPeak() + "Hz\n");
-                System.out.print("Is Periodic? " + initDetectorList.isPeriodic(pitch, roll, yaw) + " in "+ initDetectorList.getPeakDetected() + " direction\n");
+                //System.out.print("Peak Frequency " + initDetectorList.getPeak() + "Hz\n");
+               // System.out.print("Is Periodic? " + initDetectorList.isPeriodic(pitch, roll, yaw) + " in "+ initDetectorList.getPeakDetected() + " direction\n");
 
-                if(initDetectorList.isPeriodic(pitch, roll, yaw))
-                    System.out.println(indexOffset);
+                double freqtext = initDetectorList.getFreq();
+                double magnitude = initDetectorList.getMag();
+
+               /* if(freqtext != 0) {
+                    System.out.print("Freq:" + freqtext + "Current Time: " + System.currentTimeMillis() + " in "+ initDetectorList.getPeakDetected() + " direction" + "\n");
+                }*/
+                boolean isPeriodic = initDetectorList.isPeriodic(pitch, roll, yaw);
+                //System.out.println("IS PERIODIC: " + isPeriodic + " FREQ " + freqtext + " MAG " + magnitude + " " +  initDetectorList.getPeakDetected());
+
+
+                if (isPeriodic && newlyPeriodic == true) {
+                    newlyPeriodic = false;
+                   // System.out.println("START " + System.currentTimeMillis());
+                }
+
+                if(!newlyPeriodic){
+                    double timechange = (1 /freqtext) * 1000;
+                   // System.out.println("TIME CHANGE: " + timechange + " Current " + (System.currentTimeMillis() - prevUpdate));
+                  //  System.out.println("IS PERIODIC: " + isPeriodic + " FREQ " + freqtext + " MAG " + magnitude + " " +  initDetectorList.getPeakDetected());
+
+                    long current = System.currentTimeMillis();
+                    if (prevUpdate == -1 || (current - prevUpdate) >= timechange) {
+                        prevUpdate = current;
+                        RepCount++;
+                    }
+                }
+
+
+
+
+                if (RepCount != n) {
+                    System.out.print("Freq: " + freqtext + " Mag: " + magnitude + " Rep Count: " + RepCount + " Current Time: " + System.currentTimeMillis() +"\n");
+                    n++;
+                }
+
+
+               // if(initDetectorList.isPeriodic(pitch, roll, yaw))
+                    //System.out.println(indexOffset);
 
                 //System.out.println(indexOffset);
                 pitchFreqMag = initDetector.getPitchFreq();
@@ -371,6 +401,10 @@ public class Main {
             Arrays.fill(pitchpre, 0.0);
             Arrays.fill(rollpre, 0.0);
             Arrays.fill(yawpre, 0.0);
+            newlyPeriodic = true;
+            prevUpdate = -1;
+            RepCount = 0;
+            n = 0;
         }
         //csv.Write(DesiredAngle,ActualAngle,Difference,RepIn,capacity);
 
