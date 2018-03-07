@@ -34,7 +34,7 @@ public class Main {
         System.out.println(initDetector.getFs());
 
 
-        int file = 1;
+        int file = 2;
         double timeFactor = 0.01;
         double RawtimeFactor = 0.0038;
         //double filteredtimeFactor = 0.05; //DOWNSAMPLE2: delete this variable
@@ -70,7 +70,7 @@ public class Main {
         int FirstRep = 0;
         int n = 0;
 
-        int capacity = 1;
+        int capacity = 2;
 
         String[] DesiredAngle = new String[capacity];
         String[] ActualAngle = new String[capacity];
@@ -221,6 +221,8 @@ public class Main {
             }
             System.out.print("\n"); */
 
+                repetitiveMotionDetector.isPeriodic(pitch);
+
                 rollpre[0] = newPoints[1];
                 rollRolling = filtration.Filter(rollpre, sizeOfArray, "roll")[0];
                 rollfiltered = filtration.Filter(rollpre, sizeOfArray, "roll")[1];
@@ -276,13 +278,13 @@ public class Main {
                 //System.out.print("Peak Frequency " + initDetectorList.getPeak() + "Hz\n");
                // System.out.print("Is Periodic? " + initDetectorList.isPeriodic(pitch, roll, yaw) + " in "+ initDetectorList.getPeakDetected() + " direction\n");
 
-                double freqtext = initDetectorList.getFreq();
+               /* double freqtext = initDetectorList.getFreq();
                 double magnitude = initDetectorList.getMag();
 
                /* if(freqtext != 0) {
                     System.out.print("Freq:" + freqtext + "Current Time: " + System.currentTimeMillis() + " in "+ initDetectorList.getPeakDetected() + " direction" + "\n");
                 }*/
-                boolean isPeriodic = initDetectorList.isPeriodic(pitch, roll, yaw);
+               /* boolean isPeriodic = initDetectorList.isPeriodic(pitch, roll, yaw);
                 //System.out.println("IS PERIODIC: " + isPeriodic + " FREQ " + freqtext + " MAG " + magnitude + " " +  initDetectorList.getPeakDetected());
 
 
@@ -309,7 +311,8 @@ public class Main {
                 if (RepCount != n) {
                     System.out.print("Freq: " + freqtext + " Mag: " + magnitude + " Rep Count: " + RepCount + " Current Time: " + System.currentTimeMillis() +"\n");
                     n++;
-                }
+                }*/
+
 
 
                // if(initDetectorList.isPeriodic(pitch, roll, yaw))
