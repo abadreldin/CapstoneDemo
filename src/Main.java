@@ -222,6 +222,7 @@ public class Main {
             System.out.print("\n"); */
 
                 repetitiveMotionDetector.isPeriodic(pitch);
+                System.out.println("Called");
 
                 rollpre[0] = newPoints[1];
                 rollRolling = filtration.Filter(rollpre, sizeOfArray, "roll")[0];
