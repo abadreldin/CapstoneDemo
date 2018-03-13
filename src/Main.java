@@ -88,6 +88,11 @@ public class Main {
         int indexOffset = 1;
         int change = 1;
 
+        double numMins = 0;
+        double numMaxes = 0;
+        double idealp2p= 0.0;
+        int numReps = 0;
+
 
         // Create Chart
         /*final XYChart chart = QuickChart.getChart("Raw Data", "Time", "Degrees", "Pitch", rawtime, pitchpre);
@@ -221,8 +226,20 @@ public class Main {
             }
             System.out.print("\n"); */
 
-                repetitiveMotionDetector.isPeriodic(pitch);
-                System.out.println("Called");
+                boolean isPeriodic = repetitiveMotionDetector.isPeriodic(pitch, indexOffset);
+                /*freqtext = (float) motion.getfreq();
+                motionError = motion.isMotionError();
+                toofast = motion.isToofast();
+
+                if(isPeriodic){
+                    current = System.currentTimeMillis();
+                    if (prevUpdate == -1 || (current - prevUpdate) >= (1f/freqtext) * 1000f) {
+                        prevUpdate = current;
+                        numReps++;
+                        rep = true;
+                    }
+                }*/
+               // System.out.println("isPeriodic? " + isPeriodic + " Rep Count " + numReps);
 
                 rollpre[0] = newPoints[1];
                 rollRolling = filtration.Filter(rollpre, sizeOfArray, "roll")[0];
