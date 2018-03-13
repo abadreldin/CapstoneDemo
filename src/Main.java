@@ -227,6 +227,8 @@ public class Main {
             System.out.print("\n"); */
 
                 boolean isPeriodic = repetitiveMotionDetector.isPeriodic(pitch, indexOffset);
+                double freq = repetitiveMotionDetector.getfreq();
+                System.out.println("Is Periodic: " + isPeriodic + " Freq Text " + freq);
                 /*freqtext = (float) motion.getfreq();
                 motionError = motion.isMotionError();
                 toofast = motion.isToofast();
