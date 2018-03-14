@@ -226,9 +226,14 @@ public class Main {
             }
             System.out.print("\n"); */
 
-                boolean isPeriodic = repetitiveMotionDetector.isPeriodic(pitch, indexOffset);
+                boolean isPPeriodic = repetitiveMotionDetector.isPeriodic(pitch);
                 double freq = repetitiveMotionDetector.getfreq();
-                System.out.println("Is Periodic: " + isPeriodic + " Freq Text " + freq);
+                double percent = repetitiveMotionDetector.percentThreshold();
+                /*double upperlimit = repetitiveMotionDetector.upperlimit();
+                double lowerlimit = repetitiveMotionDetector.lowerlimit();
+                double currP2P = repetitiveMotionDetector.currPk2Pk();*/
+                //System.out.println("Is Periodic: " + isPeriodic + " Freq Text " + freq);
+                System.out.println("Percent " + percent);
                 /*freqtext = (float) motion.getfreq();
                 motionError = motion.isMotionError();
                 toofast = motion.isToofast();

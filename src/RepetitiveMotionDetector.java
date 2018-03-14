@@ -14,6 +14,9 @@ public class RepetitiveMotionDetector {
     int numMins = 0;
     int numMaxes = 0;
     double ideal_p2p;
+    double upperbound;
+    double lowerbound;
+    double difference;
     int RepCount = 0;
     ArrayList<Double> pastEntries = new ArrayList<Double>();
     int lastMinIndex = -1;
@@ -38,7 +41,27 @@ public class RepetitiveMotionDetector {
 
     public int getRepCount() {return RepCount;}
 
-    public boolean isPeriodic(ArrayList<Double> data, int INDEX) {
+    /*public double upperlimit(){return upperbound;}
+
+    public double lowerlimit(){return lowerbound;}
+
+    public double currPk2Pk(){return difference;}*/
+
+    public double percentThreshold(){
+        double percent;
+        if(difference <= lowerbound){
+            percent = 0.0;
+        }
+        else if(difference >= upperbound){
+            percent = 100;
+        }
+        else{
+            percent = ((upperbound - difference)/(upperbound - lowerbound))*100;
+        }
+        return percent;
+    }
+
+    public boolean isPeriodic(ArrayList<Double> data) {
         ArrayList<Integer> min = new ArrayList<Integer>();
         ArrayList<Integer> max = new ArrayList<Integer>();
 //        ArrayList<Double> frequency = new ArrayList<Double>();
@@ -162,16 +185,16 @@ public class RepetitiveMotionDetector {
         }
         if(newMax == 1 && newMin == 1){
             if(numMaxes == numMins && numMaxes == 1) {
-                double difference = (repMaxVal - repMinVal);
+                difference = (repMaxVal - repMinVal);
                 ideal_p2p = difference;
                 RepCount = 1;
                 newMax = 0;
                 newMin = 0;
             }
             else if (numMaxes == numMins && numMaxes != 0) {
-                double difference = repMaxVal - repMinVal;
-                double lowerbound = ideal_p2p - (ideal_p2p * 0.2);
-                double upperbound = (ideal_p2p * 0.2) + ideal_p2p;
+                difference = repMaxVal - repMinVal;
+                lowerbound = ideal_p2p - (ideal_p2p * 0.2);
+                upperbound = (ideal_p2p * 0.2) + ideal_p2p;
                 if (numMaxes < 4 && difference < upperbound && difference > lowerbound) {
                     ideal_p2p = (ideal_p2p + difference) / 2;
                     RepCount++;
@@ -187,7 +210,7 @@ public class RepetitiveMotionDetector {
                 newMin = 0;
             }
         }
-       // if(pastEntries.size() > 1)
+        //if(pastEntries.size() > 1)
        // System.out.println("Rep Count: " + RepCount + " last Min At " + repMinVal + " Last Max At " + repMaxVal);
     }
 }
