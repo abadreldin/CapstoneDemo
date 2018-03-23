@@ -35,6 +35,7 @@ public class Main {
 
 
         int file = 1;
+        int newfile = 0;
         double timeFactor = 0.01;
         double RawtimeFactor = 0.0038;
         //double filteredtimeFactor = 0.05; //DOWNSAMPLE2: delete this variable
@@ -232,7 +233,8 @@ public class Main {
             }
             System.out.print("\n"); */
 
-                boolean isPeriodic = repetitiveMotionDetector.isPeriodic(pitch);
+                boolean isPeriodic = repetitiveMotionDetector.isPeriodic(pitch, newfile);
+                newfile = 1;
                 double freq = repetitiveMotionDetector.getfreq();
                 double percent = repetitiveMotionDetector.percentThreshold();
                 numReps = repetitiveMotionDetector.getRepCount();
@@ -448,9 +450,9 @@ public class Main {
             newlyPeriodic = true;
             prevUpdate = -1;
             RepCount = 0;
-            n = 0;
+            newfile = 0;
         }
-       /* for(int g = 0; g < capacity; g++){
+        /*for(int g = 0; g < capacity; g++){
             System.out.println("DFinal " + DesiredFinalRepCount[g] + " AFinal " + ActualFinalRepCount[g] + " DTotal " + DesiredTotalRepCount[g] + " ATotal " + ActualTotalRepCount[g]);
         }*/
         csv.Write(DesiredFinalRepCount, ActualFinalRepCount, DesiredTotalRepCount, ActualTotalRepCount, capacity);

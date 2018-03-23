@@ -63,13 +63,34 @@ public class RepetitiveMotionDetector {
         return percent;
     }
 
-    public boolean isPeriodic(ArrayList<Double> data) {
+    public boolean isPeriodic(ArrayList<Double> data, int newfile) {
         ArrayList<Integer> min = new ArrayList<Integer>();
         ArrayList<Integer> max = new ArrayList<Integer>();
 //        ArrayList<Double> frequency = new ArrayList<Double>();
         isPeriodic = false;
         motionError = false;
         toofast = false;
+
+        if( newfile == 0){
+            motionFrequency = 0;
+            trending = 0;
+
+            totalReps = 0;
+
+            entries = 0;
+
+            numMins = 0;
+            numMaxes = 0;
+            RepCount = 0;
+            pastEntries.clear();
+            lastMinIndex = -1;
+            lastMaxIndex = -1;
+            Reptrending = 0;
+            repMinVal = 0;
+            repMaxVal = 0;
+            newMax = 0;
+            newMin = 0;
+        }
 
         int downsample = 40;
         int p = 0;
