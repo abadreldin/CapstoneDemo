@@ -113,7 +113,7 @@ public class CSV {
 
     }
 
-    public static int getReps(int file, int j) {
+    public static int getRepTimes(int file, int j) {
         String csvFile = "/Users/janellesomerville/Desktop/csvs/" + Integer.toString(file) + ".csv";
         BufferedReader br = null;
         String line = "";
@@ -167,10 +167,75 @@ public class CSV {
 
     }
 
-    public static void Write(String[] DesiredAngle, String[] ActualAngle, String[] Difference, String[] RepIn, int capacity) throws FileNotFoundException{
+    public static int[] getIdealRepCounts(int file) {
+        String csvFile = "/Users/janellesomerville/Desktop/csvs/" + Integer.toString(file) + ".csv";
+        BufferedReader br = null;
+        String line = "";
+        String cvsSplitBy = ",";
+        double seconds = 0.0;
+        int[] output = new int[2];
+        int i = -1;
+
+        try {
+
+            br = new BufferedReader(new FileReader(csvFile));
+            while ((line = br.readLine()) != null) {
+
+                if(i == 0) {
+
+                    // use comma as separator
+                    String[] csvdata = line.split(cvsSplitBy);
+
+                    if(!(csvdata[8].replace("\"","").isEmpty())){
+                        output[1]= (int)Double.parseDouble(csvdata[8].replace("\"", ""));
+                    }
+
+                    else{
+                        output[1] = 0;
+                    }
+
+                }
+                else if (i == 1){
+                    // use comma as separator
+                    String[] csvdata = line.split(cvsSplitBy);
+
+                    if(!(csvdata[8].replace("\"","").isEmpty())){
+                        output[0]= (int)Double.parseDouble(csvdata[8].replace("\"", ""));
+                    }
+
+                    else{
+                        output[0] = output[1];
+                    }
+                    //System.out.print("Output " + output[0] + " Second " + output[1]);
+                }
+
+                i++;
+
+
+            }
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (br != null) {
+                try {
+                    br.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return output;
+
+    }
+
+    public static void Write(String[] DesiredFinalRepCount, String[] ActualFinalRepCount, String[] DesiredTotalRepCount, String[] ActualTotalRepCount, int capacity) throws FileNotFoundException{
         PrintWriter pw = new PrintWriter(new File("Results.csv"));
         StringBuilder sb = new StringBuilder();
-        sb.append("Desired Angle");
+        /*sb.append("Desired Angle");
         sb.append(',');
         sb.append("Actual Angle");
         sb.append(',');
@@ -179,18 +244,24 @@ public class CSV {
         sb.append("Actual Index");
         sb.append(',');
         sb.append("Desired Index");
+        sb.append(',');*/
+        sb.append("Desired Final Repetition Count");
         sb.append(',');
-        sb.append("Repetition In");
+        sb.append("Actual Final");
+        sb.append(',');
+        sb.append("Desired Total Repetition Count");
+        sb.append(',');
+        sb.append("Actual Total");
         sb.append('\n');
 
         for(int i = 0; i < capacity; i++) {
-            sb.append(DesiredAngle[i]);
+            sb.append(DesiredFinalRepCount[i]);
             sb.append(',');
-            sb.append(ActualAngle[i]);
+            sb.append(ActualFinalRepCount[i]);
             sb.append(',');
-            sb.append(Difference[i]);
+            sb.append(DesiredTotalRepCount[i]);
             sb.append(',');
-            sb.append(RepIn[i]);
+            sb.append(ActualTotalRepCount[i]);
             sb.append('\n');
         }
 

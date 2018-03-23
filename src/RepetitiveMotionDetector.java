@@ -5,10 +5,10 @@ public class RepetitiveMotionDetector {
     boolean isPeriodic;
     boolean motionError;
     boolean toofast;
-    float timestamp;
     int trending = 0;
 
-    ArrayList<Double> prevVals = new ArrayList<Double>();
+    int totalReps = 0;
+
     int entries = 0;
 
     int numMins = 0;
@@ -40,6 +40,8 @@ public class RepetitiveMotionDetector {
     }
 
     public int getRepCount() {return RepCount;}
+
+    public int getTotalReps() {return totalReps;}
 
     /*public double upperlimit(){return upperbound;}
 
@@ -188,6 +190,7 @@ public class RepetitiveMotionDetector {
                 difference = (repMaxVal - repMinVal);
                 ideal_p2p = difference;
                 RepCount = 1;
+                totalReps++;
                 newMax = 0;
                 newMin = 0;
             }
@@ -198,14 +201,20 @@ public class RepetitiveMotionDetector {
                 if (numMaxes < 4 && difference < upperbound && difference > lowerbound) {
                     ideal_p2p = (ideal_p2p + difference) / 2;
                     RepCount++;
-                } else if (difference < upperbound && difference > lowerbound)
+                    totalReps++;
+                }
+                else if (difference < upperbound && difference > lowerbound){
                     RepCount++;
-                else {
+                    totalReps++;}
+                else if (numMaxes < 4 && (difference >= upperbound ||difference <= lowerbound)) {
                     numMaxes = 1;
                     numMins = 1;
                     RepCount = 1;
+                    totalReps++;
                     ideal_p2p = difference;
                 }
+                else
+                    System.out.println("Repetition out of bounds");
                 newMax = 0;
                 newMin = 0;
             }

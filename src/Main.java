@@ -34,7 +34,7 @@ public class Main {
         System.out.println(initDetector.getFs());
 
 
-        int file = 2;
+        int file = 1;
         double timeFactor = 0.01;
         double RawtimeFactor = 0.0038;
         //double filteredtimeFactor = 0.05; //DOWNSAMPLE2: delete this variable
@@ -70,12 +70,17 @@ public class Main {
         int FirstRep = 0;
         int n = 0;
 
-        int capacity = 2;
+        int capacity = 70;
 
-        String[] DesiredAngle = new String[capacity];
+        /*String[] DesiredAngle = new String[capacity];
         String[] ActualAngle = new String[capacity];
         String[] Difference = new String[capacity];
-        String[] RepIn = new String[capacity];
+        String[] RepIn = new String[capacity];*/
+
+        String[] DesiredFinalRepCount = new String[capacity];
+        String[] ActualFinalRepCount = new String[capacity];
+        String[] DesiredTotalRepCount = new String[capacity];
+        String[] ActualTotalRepCount = new String[capacity];
 
         double[] newPoints = new double[3];
         double idealAngle;
@@ -92,6 +97,7 @@ public class Main {
         double numMaxes = 0;
         double idealp2p= 0.0;
         int numReps = 0;
+        int TotalReps = 0;
 
 
         // Create Chart
@@ -226,14 +232,17 @@ public class Main {
             }
             System.out.print("\n"); */
 
-                boolean isPPeriodic = repetitiveMotionDetector.isPeriodic(pitch);
+                boolean isPeriodic = repetitiveMotionDetector.isPeriodic(pitch);
                 double freq = repetitiveMotionDetector.getfreq();
                 double percent = repetitiveMotionDetector.percentThreshold();
+                numReps = repetitiveMotionDetector.getRepCount();
+                TotalReps = repetitiveMotionDetector.getTotalReps();
                 /*double upperlimit = repetitiveMotionDetector.upperlimit();
                 double lowerlimit = repetitiveMotionDetector.lowerlimit();
                 double currP2P = repetitiveMotionDetector.currPk2Pk();*/
                 //System.out.println("Is Periodic: " + isPeriodic + " Freq Text " + freq);
-                System.out.println("Percent " + percent);
+                //System.out.println("Percent " + percent);
+                //System.out.println("NumReps " + numReps);
                 /*freqtext = (float) motion.getfreq();
                 motionError = motion.isMotionError();
                 toofast = motion.isToofast();
@@ -377,7 +386,7 @@ public class Main {
             chart.updateXYSeries("Yaw", rawtime, yawpre, null);
             sw.repaintChart(); */
             }
-            idealAngle = csv.SignificantAngle(file);
+            /*idealAngle = csv.SignificantAngle(file);
             DesiredAngle[(file - 1)] = Double.toString(idealAngle);
             if (Angle == 0 ){
                 Difference[(file-1)] = "4";
@@ -415,11 +424,18 @@ public class Main {
                         j = 10;
                     }
                 }
-            }
+            }*/
             //DesiredAngle[(file-1)] = "1.0";
             //ActualAngle[(file-1)] = "1.0";
             //Difference[(file-1)] = "1.0";
             //RepIn[(file-1)] = "1.0";
+
+            int[] RepCsvOut = csv.getIdealRepCounts(file);
+            //System.out.println (" int " + RepCsvOut[0] + " " + (int)RepCsvOut[0] + " " + Integer.toString(RepCsvOut[0]));
+            DesiredFinalRepCount[(file-1)] = Integer.toString(RepCsvOut[1]);
+            DesiredTotalRepCount[(file-1)] = Integer.toString(RepCsvOut[0]);
+            ActualFinalRepCount[(file-1)] = Integer.toString(numReps);
+            ActualTotalRepCount[(file-1)] = Integer.toString(TotalReps);
 
             file++;
             indexOffset = 1;
@@ -434,7 +450,10 @@ public class Main {
             RepCount = 0;
             n = 0;
         }
-        //csv.Write(DesiredAngle,ActualAngle,Difference,RepIn,capacity);
+       /* for(int g = 0; g < capacity; g++){
+            System.out.println("DFinal " + DesiredFinalRepCount[g] + " AFinal " + ActualFinalRepCount[g] + " DTotal " + DesiredTotalRepCount[g] + " ATotal " + ActualTotalRepCount[g]);
+        }*/
+        csv.Write(DesiredFinalRepCount, ActualFinalRepCount, DesiredTotalRepCount, ActualTotalRepCount, capacity);
 
     }
 
