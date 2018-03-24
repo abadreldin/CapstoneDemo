@@ -34,7 +34,7 @@ public class Main {
         System.out.println(initDetector.getFs());
 
 
-        int file = 1;
+        int file = 2;
         int newfile = 0;
         double timeFactor = 0.01;
         double RawtimeFactor = 0.0038;
@@ -71,7 +71,7 @@ public class Main {
         int FirstRep = 0;
         int n = 0;
 
-        int capacity = 70;
+        int capacity = 2;
 
         /*String[] DesiredAngle = new String[capacity];
         String[] ActualAngle = new String[capacity];
@@ -211,9 +211,9 @@ public class Main {
                     System.out.print(roll.get(i));
                 }
                 System.out.print("\n");*/
-                pitch = filtration.PitchFilter(pitch, sizeOfArray, "pitch");
+                /*pitch = filtration.PitchFilter(pitch, sizeOfArray, "pitch");
                 roll = filtration.PitchFilter(roll, sizeOfArray, "roll");
-                yaw = filtration.PitchFilter(yaw, sizeOfArray, "yaw");
+                yaw = filtration.PitchFilter(yaw, sizeOfArray, "yaw");*/
                 /*System.out.print("Post Pitch: ");
                 for(int i= 0; i < roll.size(); i++) {
                     System.out.print(roll.get(i));
@@ -233,7 +233,7 @@ public class Main {
             }
             System.out.print("\n"); */
 
-                boolean isPeriodic = repetitiveMotionDetector.isPeriodic(pitch, newfile);
+                boolean isPeriodic = repetitiveMotionDetector.isPeriodic(pitch, roll, yaw, newfile);
                 newfile = 1;
                 double freq = repetitiveMotionDetector.getfreq();
                 double percent = repetitiveMotionDetector.percentThreshold();
@@ -242,7 +242,7 @@ public class Main {
                 /*double upperlimit = repetitiveMotionDetector.upperlimit();
                 double lowerlimit = repetitiveMotionDetector.lowerlimit();
                 double currP2P = repetitiveMotionDetector.currPk2Pk();*/
-                //System.out.println("Is Periodic: " + isPeriodic + " Freq Text " + freq);
+                System.out.println("Is Periodic: " + isPeriodic + " Freq Text " + freq);
                 //System.out.println("Percent " + percent);
                 //System.out.println("NumReps " + numReps);
                 /*freqtext = (float) motion.getfreq();
@@ -452,10 +452,10 @@ public class Main {
             RepCount = 0;
             newfile = 0;
         }
-        /*for(int g = 0; g < capacity; g++){
+        for(int g = 0; g < capacity; g++){
             System.out.println("DFinal " + DesiredFinalRepCount[g] + " AFinal " + ActualFinalRepCount[g] + " DTotal " + DesiredTotalRepCount[g] + " ATotal " + ActualTotalRepCount[g]);
-        }*/
-        csv.Write(DesiredFinalRepCount, ActualFinalRepCount, DesiredTotalRepCount, ActualTotalRepCount, capacity);
+        }
+        //csv.Write(DesiredFinalRepCount, ActualFinalRepCount, DesiredTotalRepCount, ActualTotalRepCount, capacity);
 
     }
 

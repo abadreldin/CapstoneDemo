@@ -1,11 +1,18 @@
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class RepetitiveMotionDetector {
     double motionFrequency = 0;
     boolean isPeriodic;
     boolean motionError;
     boolean toofast;
-    int trending = 0;
+    double[] motionFrequencyAll = new double[3];
+    boolean[] motionErrorAll = new boolean[3];
+    boolean[] toofastAll = new boolean[3];
+    boolean[] isPeriodicAll = new boolean[3];
+    int[] trending = new int[3];
+    double[] averageAmplitudes = new double[3];
 
     int totalReps = 0;
 
@@ -63,9 +70,7 @@ public class RepetitiveMotionDetector {
         return percent;
     }
 
-    public boolean isPeriodic(ArrayList<Double> data, int newfile) {
-        ArrayList<Integer> min = new ArrayList<Integer>();
-        ArrayList<Integer> max = new ArrayList<Integer>();
+    public boolean isPeriodic(ArrayList<Double> pitch, ArrayList<Double> roll, ArrayList<Double> yaw, int newfile) {
 //        ArrayList<Double> frequency = new ArrayList<Double>();
         isPeriodic = false;
         motionError = false;
@@ -73,7 +78,7 @@ public class RepetitiveMotionDetector {
 
         if( newfile == 0){
             motionFrequency = 0;
-            trending = 0;
+            Arrays.fill(trending, 0);
 
             totalReps = 0;
 
@@ -92,79 +97,129 @@ public class RepetitiveMotionDetector {
             newMin = 0;
         }
 
-        int downsample = 40;
-        int p = 0;
-        int k = 0;
         entries++;
+        int downsample = 40;
 
         if(entries%downsample == 0){
-            checkForReps(data.get(0), entries);
+            checkForReps(pitch.get(0), entries);
         }
 
+        //System.out.println(" NEW CALL ");
+
+        isPeriodicCheck(pitch,downsample, 0);
+        isPeriodicCheck(roll,downsample, 1);
+        isPeriodicCheck(yaw,downsample, 2);
+
+        if((averageAmplitudes[0] > averageAmplitudes[1]) && (averageAmplitudes[0] > averageAmplitudes[2])) {
+            isPeriodic = isPeriodicAll[0];
+            motionFrequency = motionFrequencyAll[0];
+            motionError = motionErrorAll[0];
+            toofast = toofastAll[0];
+        }
+        else if(averageAmplitudes[1] > averageAmplitudes[2]) {
+            isPeriodic = isPeriodicAll[1];
+            motionFrequency = motionFrequencyAll[1];
+            motionError = motionErrorAll[1];
+            toofast = toofastAll[1];
+        }
+        else{
+            isPeriodic = isPeriodicAll[2];
+            motionFrequency = motionFrequencyAll[2];
+            motionError = motionErrorAll[2];
+            toofast = toofastAll[2];
+        }
+
+//        if(motionFrequencyAll[0] != 0)
+//        System.out.println("Pitch " + isPeriodicAll[0] + " " + motionFrequencyAll[0]+ " " + averageAmplitudes[0]);
+//        if(motionFrequencyAll[1] != 0)
+//        System.out.println("Roll " + isPeriodicAll[1] + " " + motionFrequencyAll[1]+ " " + averageAmplitudes[1]);
+//        if(motionFrequencyAll[2] != 0)
+//        System.out.println("Yaw " + isPeriodicAll[2] + " " + motionFrequencyAll[2] + " " + averageAmplitudes[2]);
+
+        return isPeriodic;
+    }
+
+    public void isPeriodicCheck(ArrayList<Double> data, int downsample, int angle){
+        int p = 0;
+        int k = 0;
+        ArrayList<Integer> min = new ArrayList<Integer>();
+        ArrayList<Integer> max = new ArrayList<Integer>();
+        ArrayList<Double> minVal = new ArrayList<Double>();
+        ArrayList<Double> maxVal = new ArrayList<Double>();
+        isPeriodicAll[angle] = false;
+        motionFrequencyAll[angle] = 0.0;
+        trending[angle] = 0;
+        averageAmplitudes[angle] = 0;
+
         for(int i = 0; i < (data.size()-downsample); i+=40){
-            if (trending == 0) { //no known trend yet
+            if (trending[angle] == 0) { //no known trend yet
                 if (data.get(i) < data.get(i + downsample)) //i + downsampled because data(0) more recent
-                    trending = -1;
+                    trending[angle] = 1;
                 else
-                    trending = 1;
+                    trending[angle] = -1;
             }
-            else if(trending == -1) { //trending downward so looking for a min
-                if (data.get(i) > data.get(i + downsample)) {
+            else if(trending[angle] == -1) { //trending downward so looking for a min
+                if (data.get(i) < data.get(i + downsample)) {
                     min.add(k, i);
+                    minVal.add(k, data.get(i));
                     if (k != 0) {
                         double min_difference = min.get(k) - min.get(k - 1);
                         if (min_difference > 200 && min_difference < 600) {
                             //isPeriodic true
-                            isPeriodic = true;
+                            isPeriodicAll[angle] = true;
                             double frequency_val = (1 / (min_difference / 100));
-                            motionFrequency = (frequency_val + motionFrequency)/2;
-                            motionError = true;
+                            motionFrequencyAll[angle] = (frequency_val + motionFrequencyAll[angle])/2;
+                            motionErrorAll[angle] = true;
                             if (min_difference > 500)
-                                toofast = false;
+                                toofastAll[angle] = false;
                             else if (min_difference < 300)
-                                toofast = true;
+                                toofastAll[angle] = true;
                             else
-                                motionError = false;
+                                motionErrorAll[angle] = false;
                         }
                     }
-                    trending = 1;
+                    trending[angle] = 1;
                     k++;
                 }
                 else if (data.get(i).equals(data.get(i + downsample))){
-                    trending = 0;
-                    motionFrequency = (0 + motionFrequency)/2;
+                    trending[angle] = 0;
+                    //motionFrequency = (0 + motionFrequency)/2;
                 }
             }
-            else if(trending == 1) {// trending upward so looking for max
-                if (data.get(i) < data.get(i + downsample)) {
+            else if(trending[angle] == 1) {// trending upward so looking for max
+                if (data.get(i) > data.get(i + downsample)) {
                     max.add(p, i);
+                    maxVal.add(p, data.get(i));
                     if (p != 0) {
                         double max_difference = max.get(p) - max.get(p - 1);
                         if (max_difference > 200 && max_difference < 600) {
                             //isPeriodic true
-                            isPeriodic = true;
+                            isPeriodicAll[angle] = true;
                             double frequency_val = (1 / (max_difference / 100));
-                            motionFrequency = (frequency_val + motionFrequency)/2;
-                            motionError = true;
+                            motionFrequencyAll[angle] = (frequency_val + motionFrequencyAll[angle]) / 2;
+                            motionErrorAll[angle] = true;
                             if (max_difference > 500)
-                                toofast = false;
+                                toofastAll[angle] = false;
                             else if (max_difference < 300)
-                                toofast = true;
+                                toofastAll[angle] = true;
                             else
-                                motionError = false;
+                                motionErrorAll[angle] = false;
                         }
                     }
-                    trending = -1;
+                    trending[angle] = -1;
                     p++;
-                }
-                else if (data.get(i).equals(data.get(i + downsample))){
-                    trending = 0;
-                    motionFrequency = (0 + motionFrequency)/2;
+                } else if (data.get(i).equals(data.get(i + downsample))) {
+                    trending[angle] = 0;
+                    //motionFrequency =  (0 + motionFrequency)/2;
                 }
             }
-
+                if(p == k && k == 1) {
+                    averageAmplitudes[angle] = (maxVal.get(p-1) - minVal.get(k-1));
+                }
+                else if (p == k && p != 0) {
+                    averageAmplitudes[angle] = (averageAmplitudes[angle] + (maxVal.get(p-1) - minVal.get(k-1)))/2;
+                }
         }
-        return isPeriodic;
     }
 
     public void checkForReps(double newEntry, int i){
@@ -235,7 +290,7 @@ public class RepetitiveMotionDetector {
                     ideal_p2p = difference;
                 }
                 else
-                    System.out.println("Repetition out of bounds");
+                   // System.out.println("Repetition out of bounds");
                 newMax = 0;
                 newMin = 0;
             }
