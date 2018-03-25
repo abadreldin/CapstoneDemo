@@ -34,7 +34,7 @@ public class Main {
         System.out.println(initDetector.getFs());
 
 
-        int file = 2;
+        int file = 56;
         int newfile = 0;
         double timeFactor = 0.01;
         double RawtimeFactor = 0.0038;
@@ -71,7 +71,7 @@ public class Main {
         int FirstRep = 0;
         int n = 0;
 
-        int capacity = 2;
+        int capacity = 56;
 
         /*String[] DesiredAngle = new String[capacity];
         String[] ActualAngle = new String[capacity];
@@ -211,9 +211,9 @@ public class Main {
                     System.out.print(roll.get(i));
                 }
                 System.out.print("\n");*/
-                /*pitch = filtration.PitchFilter(pitch, sizeOfArray, "pitch");
+                pitch = filtration.PitchFilter(pitch, sizeOfArray, "pitch");
                 roll = filtration.PitchFilter(roll, sizeOfArray, "roll");
-                yaw = filtration.PitchFilter(yaw, sizeOfArray, "yaw");*/
+                yaw = filtration.PitchFilter(yaw, sizeOfArray, "yaw");
                 /*System.out.print("Post Pitch: ");
                 for(int i= 0; i < roll.size(); i++) {
                     System.out.print(roll.get(i));
@@ -239,12 +239,14 @@ public class Main {
                 double percent = repetitiveMotionDetector.percentThreshold();
                 numReps = repetitiveMotionDetector.getRepCount();
                 TotalReps = repetitiveMotionDetector.getTotalReps();
+                int chosenAngle = repetitiveMotionDetector.getChosenAngle();
                 /*double upperlimit = repetitiveMotionDetector.upperlimit();
                 double lowerlimit = repetitiveMotionDetector.lowerlimit();
                 double currP2P = repetitiveMotionDetector.currPk2Pk();*/
-                System.out.println("Is Periodic: " + isPeriodic + " Freq Text " + freq);
-                //System.out.println("Percent " + percent);
-                //System.out.println("NumReps " + numReps);
+                /*System.out.println("Is Periodic: " + isPeriodic + " Freq Text " + freq);
+                System.out.println("Percent " + percent);
+                System.out.println("NumReps " + numReps);*/
+               // System.out.println("Chosen Angle " + chosenAngle);
                 /*freqtext = (float) motion.getfreq();
                 motionError = motion.isMotionError();
                 toofast = motion.isToofast();
@@ -452,10 +454,12 @@ public class Main {
             RepCount = 0;
             newfile = 0;
         }
-        for(int g = 0; g < capacity; g++){
+        /*for(int g = (file-1); g < capacity; g++){
             System.out.println("DFinal " + DesiredFinalRepCount[g] + " AFinal " + ActualFinalRepCount[g] + " DTotal " + DesiredTotalRepCount[g] + " ATotal " + ActualTotalRepCount[g]);
-        }
-        //csv.Write(DesiredFinalRepCount, ActualFinalRepCount, DesiredTotalRepCount, ActualTotalRepCount, capacity);
+        }*/
+        // System.out.print("\n");
+        System.out.println("Done!");
+//        csv.Write(DesiredFinalRepCount, ActualFinalRepCount, DesiredTotalRepCount, ActualTotalRepCount, capacity);
 
     }
 

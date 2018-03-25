@@ -55,9 +55,9 @@ public class InitialPeriodicMotionDetector {
 
     public InitialPeriodicMotionDetector(){}
 
-    public void finalize() {
+   /* public void finalize() {
         System.out.println("Detector is being destroyed");
-    }
+    }*/
 
     public InitialPeriodicMotionDetector(int Fs, int arraySize){
         this.Fs = Fs;

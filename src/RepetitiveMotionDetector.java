@@ -16,23 +16,29 @@ public class RepetitiveMotionDetector {
 
     int totalReps = 0;
 
+    int chosenAngle = -1;
+
     int entries = 0;
 
-    int numMins = 0;
-    int numMaxes = 0;
+    int[] numMins = new int[3];
+    int[] numMaxes = new int[3];
     double ideal_p2p;
     double upperbound;
     double lowerbound;
-    double difference;
+    double[] difference = new double[3];
     int RepCount = 0;
-    ArrayList<Double> pastEntries = new ArrayList<Double>();
-    int lastMinIndex = -1;
-    int lastMaxIndex = -1;
-    int Reptrending = 0;
-    double repMinVal = 0;
-    double repMaxVal = 0;
-    int newMax = 0;
-    int newMin = 0;
+    ArrayList<Double> pastPitchEntries = new ArrayList<Double>();
+    ArrayList<Double> pastRollEntries = new ArrayList<Double>();
+    ArrayList<Double> pastYawEntries = new ArrayList<Double>();
+    int[] lastMinIndex = {-1,-1,-1};
+    int[] lastMaxIndex = {-1,-1,-1};
+    int[] lastCountedMin = {-1,-1,-1};
+    int[] lastCountedMax = {-1,-1,-1};
+    int[] Reptrending = new int[3];
+    double[] repMinVal = new double[3];
+    double[] repMaxVal = new double[3];
+    int[] newMax = new int[3];
+    int[] newMin = new int[3];
 
     public double getfreq(){
         return motionFrequency;
@@ -50,6 +56,8 @@ public class RepetitiveMotionDetector {
 
     public int getTotalReps() {return totalReps;}
 
+    public int getChosenAngle() {return chosenAngle;}
+
     /*public double upperlimit(){return upperbound;}
 
     public double lowerlimit(){return lowerbound;}
@@ -58,15 +66,17 @@ public class RepetitiveMotionDetector {
 
     public double percentThreshold(){
         double percent;
-        if(difference <= lowerbound){
-            percent = 0.0;
+        if(chosenAngle != -1) {
+            if (difference[chosenAngle] <= lowerbound) {
+                percent = 0.0;
+            } else if (difference[chosenAngle] >= upperbound) {
+                percent = 100;
+            } else {
+                percent = ((upperbound - difference[chosenAngle]) / (upperbound - lowerbound)) * 100;
+            }
         }
-        else if(difference >= upperbound){
-            percent = 100;
-        }
-        else{
-            percent = ((upperbound - difference)/(upperbound - lowerbound))*100;
-        }
+        else
+            percent = 0;
         return percent;
     }
 
@@ -84,24 +94,28 @@ public class RepetitiveMotionDetector {
 
             entries = 0;
 
-            numMins = 0;
-            numMaxes = 0;
+            Arrays.fill(numMins, 0);;
+            Arrays.fill(numMaxes, 0);;
             RepCount = 0;
-            pastEntries.clear();
-            lastMinIndex = -1;
-            lastMaxIndex = -1;
-            Reptrending = 0;
-            repMinVal = 0;
-            repMaxVal = 0;
-            newMax = 0;
-            newMin = 0;
+            pastPitchEntries.clear();
+            pastRollEntries.clear();
+            pastYawEntries.clear();
+            Arrays.fill(lastMinIndex, -1);
+            Arrays.fill(lastMaxIndex, -1);
+            Arrays.fill(lastCountedMin, -1);
+            Arrays.fill(lastCountedMax, -1);
+            Arrays.fill(Reptrending, 0);
+            Arrays.fill(repMinVal, 0);
+            Arrays.fill(repMaxVal, 0);
+            Arrays.fill(newMax, 0);
+            Arrays.fill(newMin, 0);
         }
 
         entries++;
         int downsample = 40;
 
         if(entries%downsample == 0){
-            checkForReps(pitch.get(0), entries);
+            checkForRepsAllAngles(pitch.get(0), roll.get(0), yaw.get(0), entries);
         }
 
         //System.out.println(" NEW CALL ");
@@ -110,23 +124,29 @@ public class RepetitiveMotionDetector {
         isPeriodicCheck(roll,downsample, 1);
         isPeriodicCheck(yaw,downsample, 2);
 
-        if((averageAmplitudes[0] > averageAmplitudes[1]) && (averageAmplitudes[0] > averageAmplitudes[2])) {
-            isPeriodic = isPeriodicAll[0];
-            motionFrequency = motionFrequencyAll[0];
-            motionError = motionErrorAll[0];
-            toofast = toofastAll[0];
-        }
-        else if(averageAmplitudes[1] > averageAmplitudes[2]) {
-            isPeriodic = isPeriodicAll[1];
-            motionFrequency = motionFrequencyAll[1];
-            motionError = motionErrorAll[1];
-            toofast = toofastAll[1];
+        if(chosenAngle == -1) {
+            if ((averageAmplitudes[0] > averageAmplitudes[1]) && (averageAmplitudes[0] > averageAmplitudes[2])) {
+                isPeriodic = isPeriodicAll[0];
+                motionFrequency = motionFrequencyAll[0];
+                motionError = motionErrorAll[0];
+                toofast = toofastAll[0];
+            } else if (averageAmplitudes[1] > averageAmplitudes[2]) {
+                isPeriodic = isPeriodicAll[1];
+                motionFrequency = motionFrequencyAll[1];
+                motionError = motionErrorAll[1];
+                toofast = toofastAll[1];
+            } else {
+                isPeriodic = isPeriodicAll[2];
+                motionFrequency = motionFrequencyAll[2];
+                motionError = motionErrorAll[2];
+                toofast = toofastAll[2];
+            }
         }
         else{
-            isPeriodic = isPeriodicAll[2];
-            motionFrequency = motionFrequencyAll[2];
-            motionError = motionErrorAll[2];
-            toofast = toofastAll[2];
+            isPeriodic = isPeriodicAll[chosenAngle];
+            motionFrequency = motionFrequencyAll[chosenAngle];
+            motionError = motionErrorAll[chosenAngle];
+            toofast = toofastAll[chosenAngle];
         }
 
 //        if(motionFrequencyAll[0] != 0)
@@ -222,80 +242,235 @@ public class RepetitiveMotionDetector {
         }
     }
 
-    public void checkForReps(double newEntry, int i){
-        pastEntries.add(0, newEntry);
-        for(int l = pastEntries.size(); l > 1024; l--){
-            pastEntries.remove(l);
-        }
-        if(Reptrending == 0 && pastEntries.size() > 1) { //no known trend yet
-            if (pastEntries.get(0) < pastEntries.get(1))
-                Reptrending = -1;
-            else
-                Reptrending = 1;
-        }
-        else if(Reptrending == -1) { //trending downward so looking for a min
-            if (pastEntries.get(0) > pastEntries.get(1)) {
-                if (lastMinIndex != -1) {
-                    int min_difference = i - lastMinIndex;
-                    if (min_difference > 150 && min_difference < 600) {
-                        repMinVal = pastEntries.get(1);
-                        numMins++;
-                        newMin = 1;
-                    }
+    public void checkForRepsAllAngles(double newPitch, double newRoll, double newYaw, int i){
+        //System.out.print(newPitch + ", ");
+        pastPitchEntries.add(0, newPitch);
+        pastRollEntries.add(0, newRoll);
+        pastYawEntries.add(0, newYaw);
+        checkForReps(pastPitchEntries, 0, i);
+        checkForReps(pastRollEntries, 1, i);
+        checkForReps(pastYawEntries, 2, i);
+
+        //if(chosenAngle != -1 && Math.abs(numMaxes[chosenAngle] - numMins[chosenAngle]) > 1)
+        //System.out.println("Index " + (i - lastCountedMax[chosenAngle]) + " " + numMaxes[chosenAngle] + " " + numMins[chosenAngle]);
+
+        if(chosenAngle == -1){
+            boolean[] ready = new boolean[3];
+            for(int x = 0; x < 3; x++){
+                if(numMaxes[x] == 1 && numMins[x] == 1) {
+                    ready[x] = true;
+                    difference[x] = (repMaxVal[x] - repMinVal[x]);
+                   // System.out.println("Ready in " + x + " With " + difference[x]);
                 }
-                Reptrending = 1;
-                lastMinIndex = i;
             }
-        }
-        else if(Reptrending == 1) { //trending downward so looking for a min
-            if (pastEntries.get(0) < pastEntries.get(1)) {
-                if (lastMaxIndex != -1) {
-                    int max_difference = i - lastMaxIndex;
-                    if (max_difference > 150 && max_difference < 600) {
-                        repMaxVal = pastEntries.get(1);
-                        numMaxes++;
-                        newMax = 1;
-                    }
-                }
-                Reptrending = -1;
-                lastMaxIndex = i;
-            }
-        }
-        if(newMax == 1 && newMin == 1){
-            if(numMaxes == numMins && numMaxes == 1) {
-                difference = (repMaxVal - repMinVal);
-                ideal_p2p = difference;
+            if(ready[0] && difference[0]>difference[1] && difference[0]>difference[2] && difference[0] > 0.1){
+                ideal_p2p = difference[0];
                 RepCount = 1;
                 totalReps++;
-                newMax = 0;
-                newMin = 0;
+                newMax[0] = 0;
+                newMin[0] = 0;
+               // numMaxes[0] = 1;
+               // numMins[0] = 1;
+                chosenAngle = 0;
             }
-            else if (numMaxes == numMins && numMaxes != 0) {
-                difference = repMaxVal - repMinVal;
-                lowerbound = ideal_p2p - (ideal_p2p * 0.2);
-                upperbound = (ideal_p2p * 0.2) + ideal_p2p;
-                if (numMaxes < 4 && difference < upperbound && difference > lowerbound) {
-                    ideal_p2p = (ideal_p2p + difference) / 2;
-                    RepCount++;
-                    totalReps++;
+            else if(ready[1] && difference[1] > difference[2] && difference[1] > 0.1){
+                ideal_p2p = difference[1];
+                RepCount = 1;
+                totalReps++;
+                newMax[1] = 0;
+                newMin[1] = 0;
+               // numMaxes[1] = 1;
+               // numMins[1] = 1;
+                chosenAngle = 1;
+            }
+            else if (ready[2] && difference[2] > 0.1){
+                ideal_p2p = difference[2];
+                RepCount = 1;
+                totalReps++;
+                newMax[2] = 0;
+                newMin[2] = 0;
+               // numMaxes[2] = 1;
+              //  numMins[2] = 1;
+                chosenAngle = 2;
+            }
+            if(chosenAngle != -1)
+                System.out.println("First Rep at " + i/40 + " with " + chosenAngle);
+        }
+
+        else if(Math.abs(numMaxes[chosenAngle] - numMins[chosenAngle]) > 1){
+            boolean[] ready = new boolean[3];
+            for(int x = 0; x < 3; x++){
+                if(numMaxes[x] == numMins[x]) {
+                    ready[x] = true;
+                    difference[x] = (repMaxVal[x] - repMinVal[x]);
+                    // System.out.println("Ready in " + x + " With " + difference[x]);
                 }
-                else if (difference < upperbound && difference > lowerbound){
-                    RepCount++;
-                    totalReps++;}
-                else if (numMaxes < 4 && (difference >= upperbound ||difference <= lowerbound)) {
-                    numMaxes = 1;
-                    numMins = 1;
-                    RepCount = 1;
-                    totalReps++;
-                    ideal_p2p = difference;
+            }
+            if(ready[0] && difference[0]>difference[1] && difference[0]>difference[2] && difference[0] > 0.1){
+                ideal_p2p = difference[0];
+                RepCount = 1;
+                totalReps++;
+                newMax[0] = 0;
+                newMin[0] = 0;
+                // numMaxes[0] = 1;
+                // numMins[0] = 1;
+                chosenAngle = 0;
+            }
+            else if(ready[1] && difference[1] > difference[2] && difference[1] > 0.1){
+                ideal_p2p = difference[1];
+                RepCount = 1;
+                totalReps++;
+                newMax[1] = 0;
+                newMin[1] = 0;
+                // numMaxes[1] = 1;
+                // numMins[1] = 1;
+                chosenAngle = 1;
+            }
+            else if (ready[2] && difference[2] > 0.1){
+                ideal_p2p = difference[2];
+                RepCount = 1;
+                totalReps++;
+                newMax[2] = 0;
+                newMin[2] = 0;
+                // numMaxes[2] = 1;
+                //  numMins[2] = 1;
+                chosenAngle = 2;
+            }
+            if(chosenAngle != -1)
+                System.out.println("Rep Count " + RepCount + " at " + i/40 + " with " + chosenAngle + " because the dif was " + difference[chosenAngle] + " upperbound " + upperbound + " lowerbound " + lowerbound);
+        }
+        else {
+            if (newMax[chosenAngle] == 1 && newMin[chosenAngle] == 1) {
+//                if (numMaxes == numMins && numMaxes[chosenAngle] == 1) {
+//                    difference[chosenAngle] = (repMaxVal[chosenAngle] - repMinVal[chosenAngle]);
+//                    ideal_p2p = difference[chosenAngle];
+//                    RepCount = 1;
+//                    totalReps++;
+//                    newMax[chosenAngle] = 0;
+//                    newMin[chosenAngle] = 0;
+//                }
+                if(numMaxes[chosenAngle] == numMins[chosenAngle] && numMaxes[chosenAngle] < 4){ //still in calibration
+                    boolean[] ready = new boolean[3];
+                    for(int x = 0; x < 3; x++){
+                        if(numMaxes[x] == numMins[x] && numMins[x] >= 1) {
+                            ready[x] = true;
+                            difference[x] = (repMaxVal[x] - repMinVal[x]);
+                        }
+                    }
+                  //  System.out.println("At " + i + " pitch " + numMaxes[0] + " " + numMins[0] + " roll " + numMaxes[1] + " " + numMins[1] + " yaw " + numMaxes[2] + " " + numMins[2] + " chosen " + chosenAngle);
+                   // System.out.println("Ideal " + ideal_p2p + " Difference " + difference[chosenAngle] + " " + i);
+                    //System.out.println("Ready " + ready[0] + " " + difference[0]+ " " + ready[1] + " " + difference[1]+ " " + ready[2] + " " + difference[2]);
+                    lowerbound = ideal_p2p - (ideal_p2p * 0.2);
+                    upperbound = (ideal_p2p * 0.2) + ideal_p2p;
+                    if(difference[chosenAngle] >= upperbound || difference[chosenAngle] <= lowerbound){ //out of calibration bounds
+                        //System.out.println("Repetition out of calibration bounds at " + i + " " + chosenAngle + " " + RepCount + " " + repMaxVal[chosenAngle] + " " + repMinVal[chosenAngle]);
+                        if(ready[0] && difference[0]>difference[1] && difference[0]>difference[2]){
+                            ideal_p2p = difference[0];
+                            RepCount = 1;
+                            totalReps++;
+                            newMax[0] = 0;
+                            newMin[0] = 0;
+                            numMaxes[0] = 1;
+                            numMins[0] = 1;
+                            chosenAngle = 0;
+                        }
+                        else if(ready[1] && difference[1] > difference[2]){
+                            ideal_p2p = difference[1];
+                            RepCount = 1;
+                            totalReps++;
+                            newMax[1] = 0;
+                            newMin[1] = 0;
+                            numMaxes[1] = 1;
+                            numMins[1] = 1;
+                            chosenAngle = 1;
+                        }
+                        else if (ready[2]){
+                            ideal_p2p = difference[2];
+                            RepCount = 1;
+                            totalReps++;
+                            newMax[2] = 0;
+                            newMin[2] = 0;
+                            numMaxes[2] = 1;
+                            numMins[2] = 1;
+                            chosenAngle = 2;
+                        }
+                    }
+                    else{ //fits in calibration
+                        ideal_p2p = (ideal_p2p + difference[chosenAngle]) / 2;
+                        RepCount++;
+                        totalReps++;
+                        newMax[chosenAngle] = 0;
+                        newMin[chosenAngle] = 0;
+                    }
+                    if(chosenAngle != -1)
+                        System.out.println("Rep Count " + RepCount + " at " + i/40 + " with " + chosenAngle + " because the dif was " + difference[chosenAngle] + " upperbound " + upperbound + " lowerbound " + lowerbound);
                 }
-                else
-                   // System.out.println("Repetition out of bounds");
-                newMax = 0;
-                newMin = 0;
+                else if (numMaxes[chosenAngle] == numMins[chosenAngle] && numMaxes[chosenAngle] != 0) {
+                    difference[chosenAngle] = repMaxVal[chosenAngle] - repMinVal[chosenAngle];
+                    lowerbound = ideal_p2p - (ideal_p2p * 0.2);
+                    upperbound = (ideal_p2p * 0.2) + ideal_p2p;
+                    if (numMaxes[chosenAngle] > 4 && difference[chosenAngle] < upperbound && difference[chosenAngle] > lowerbound) {
+                        ideal_p2p = (ideal_p2p + difference[chosenAngle]) / 2;
+                        RepCount++;
+                        totalReps++;
+                        if(chosenAngle != -1)
+                            System.out.println("Rep Count " + RepCount + " at " + i/40 + " with " + chosenAngle + " because the dif was " + difference[chosenAngle] + " upperbound " + upperbound + " lowerbound " + lowerbound);
+                    } else if (difference[chosenAngle] < upperbound && difference[chosenAngle] > lowerbound) {
+                        RepCount++;
+                        totalReps++;
+                        if(chosenAngle != -1)
+                            System.out.println("Rep Count " + RepCount + " at " + i/40 + " with " + chosenAngle + " because the dif was " + difference[chosenAngle] + " upperbound " + upperbound + " lowerbound " + lowerbound);
+                    } else {
+                        System.out.println("Repetition out of bounds at " + i + " " + chosenAngle + " because the dif was " + difference[chosenAngle] + " upperbound " + upperbound + " lowerbound " + lowerbound);
+                    }
+                        newMax[chosenAngle] = 0;
+                        newMin[chosenAngle] = 0;
+                }
             }
         }
         //if(pastEntries.size() > 1)
        // System.out.println("Rep Count: " + RepCount + " last Min At " + repMinVal + " Last Max At " + repMaxVal);
+    }
+
+    public void checkForReps(ArrayList<Double> data, int angle, int i){
+        for(int l = data.size(); l > 1024; l--){
+            data.remove(l);
+        }
+        if(Reptrending[angle] == 0 && data.size() > 1) { //no known trend yet
+            if (data.get(0) < data.get(1))
+                Reptrending[angle] = -1;
+            else
+                Reptrending[angle] = 1;
+        }
+        else if(Reptrending[angle] == -1) { //trending downward so looking for a min
+            if (data.get(0) > data.get(1)) {
+                if (lastMinIndex[angle] != -1) {
+                    int min_difference = i - lastMinIndex[angle];
+                    if (min_difference > 150 && min_difference < 600) {
+                        repMinVal[angle] = data.get(1);
+                        numMins[angle]++;
+                        newMin[angle] = 1;
+                        lastCountedMin[angle] = i;
+                    }
+                }
+                Reptrending[angle] = 1;
+                lastMinIndex[angle] = i;
+            }
+        }
+        else if(Reptrending[angle] == 1) { //trending downward so looking for a min
+            if (data.get(0) < data.get(1)) {
+                if (lastMaxIndex[angle] != -1) {
+                    int max_difference = i - lastMaxIndex[angle];
+                    if (max_difference > 150 && max_difference < 600) {
+                        repMaxVal[angle] = data.get(1);
+                        numMaxes[angle]++;
+                        newMax[angle] = 1;
+                        lastCountedMax[angle] = i;
+                    }
+                }
+                Reptrending[angle] = -1;
+                lastMaxIndex[angle] = i;
+            }
+        }
     }
 }
