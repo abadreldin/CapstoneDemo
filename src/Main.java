@@ -2,6 +2,7 @@
 import org.knowm.xchart.QuickChart;
 import org.knowm.xchart.SwingWrapper;
 import org.knowm.xchart.XYChart;
+import org.knowm.xchart.standalone.readme.IntermediateExample;
 
 
 import java.util.Arrays;
@@ -34,7 +35,7 @@ public class Main {
         System.out.println(initDetector.getFs());
 
 
-        int file = 56;
+        int file = 1;
         int newfile = 0;
         double timeFactor = 0.01;
         double RawtimeFactor = 0.0038;
@@ -71,7 +72,7 @@ public class Main {
         int FirstRep = 0;
         int n = 0;
 
-        int capacity = 56;
+        int capacity = 2;
 
         /*String[] DesiredAngle = new String[capacity];
         String[] ActualAngle = new String[capacity];
@@ -82,6 +83,19 @@ public class Main {
         String[] ActualFinalRepCount = new String[capacity];
         String[] DesiredTotalRepCount = new String[capacity];
         String[] ActualTotalRepCount = new String[capacity];
+        String[] DesiredPeak2Peak = new String[capacity];
+        String[] ActualPeak2Peak = new String[capacity];
+        String[][] DesiredMaximums = new String[capacity][100];
+        String[][] ActualMaximums = new String[capacity][100];
+        String[][] DesiredMinimums = new String[capacity][100];
+        String[][] ActualMinimums = new String[capacity][100];
+        String[][] DesiredMaximumValues = new String[capacity][100];
+        String[][] ActualMaximumValues = new String[capacity][100];
+        String[][] DesiredMinimumValues = new String[capacity][100];
+        String[][] ActualMinimumValues = new String[capacity][100];
+        String[] DesiredMostSignificantAngle = new String[capacity];
+        String[] ActualMostSignigicantAngle = new String[capacity];
+        int[] expected = {2,16};
 
         double[] newPoints = new double[3];
         double idealAngle;
@@ -97,6 +111,7 @@ public class Main {
         double numMins = 0;
         double numMaxes = 0;
         double idealp2p= 0.0;
+        int chosenAngle = -1;
         int numReps = 0;
         int TotalReps = 0;
 
@@ -239,13 +254,14 @@ public class Main {
                 double percent = repetitiveMotionDetector.percentThreshold();
                 numReps = repetitiveMotionDetector.getRepCount();
                 TotalReps = repetitiveMotionDetector.getTotalReps();
-                int chosenAngle = repetitiveMotionDetector.getChosenAngle();
+                chosenAngle = repetitiveMotionDetector.getChosenAngle();
+                idealp2p = repetitiveMotionDetector.getIdealP2P();
                 /*double upperlimit = repetitiveMotionDetector.upperlimit();
                 double lowerlimit = repetitiveMotionDetector.lowerlimit();
                 double currP2P = repetitiveMotionDetector.currPk2Pk();*/
-                /*System.out.println("Is Periodic: " + isPeriodic + " Freq Text " + freq);
-                System.out.println("Percent " + percent);
-                System.out.println("NumReps " + numReps);*/
+               // System.out.println("Is Periodic: " + isPeriodic + " Freq Text " + freq);
+               // System.out.println("Percent " + percent);
+               // System.out.println("NumReps " + numReps);
                // System.out.println("Chosen Angle " + chosenAngle);
                 /*freqtext = (float) motion.getfreq();
                 motionError = motion.isMotionError();
@@ -434,12 +450,45 @@ public class Main {
             //Difference[(file-1)] = "1.0";
             //RepIn[(file-1)] = "1.0";
 
-            int[] RepCsvOut = csv.getIdealRepCounts(file);
+            double[] RepCsvOut = csv.getIdealRepCounts(file);
             //System.out.println (" int " + RepCsvOut[0] + " " + (int)RepCsvOut[0] + " " + Integer.toString(RepCsvOut[0]));
-            DesiredFinalRepCount[(file-1)] = Integer.toString(RepCsvOut[1]);
-            DesiredTotalRepCount[(file-1)] = Integer.toString(RepCsvOut[0]);
+            DesiredFinalRepCount[(file-1)] = Integer.toString((int)RepCsvOut[1]);
+            DesiredTotalRepCount[(file-1)] = Integer.toString((int)RepCsvOut[0]);
+            DesiredPeak2Peak[(file-1)] = Double.toString(RepCsvOut[2]);
+            ActualPeak2Peak[(file-1)] = Double.toString(idealp2p);
             ActualFinalRepCount[(file-1)] = Integer.toString(numReps);
             ActualTotalRepCount[(file-1)] = Integer.toString(TotalReps);
+            DesiredMostSignificantAngle[(file-1)] = Double.toString(RepCsvOut[3]);
+            ActualMostSignigicantAngle[(file-1)] = Integer.toString(chosenAngle);
+            double[][] intermediate = repetitiveMotionDetector.getAllMaxes();
+            for(int z = 0; z < intermediate[chosenAngle].length;z++){
+                ActualMaximums[(file-1)][z] = Double.toString(intermediate[chosenAngle][z]);
+            }
+            intermediate = repetitiveMotionDetector.getAllMins();
+            for(int z = 0; z < intermediate[chosenAngle].length;z++){
+                ActualMinimums[(file-1)][z] = Double.toString(intermediate[chosenAngle][z]);
+            }
+            intermediate = repetitiveMotionDetector.getAllMinValues();
+            for(int z = 0; z < intermediate[chosenAngle].length;z++){
+                ActualMinimumValues[(file-1)][z] = Double.toString(intermediate[chosenAngle][z]);
+            }
+            intermediate = repetitiveMotionDetector.getAllMaxValues();
+            for(int z = 0; z < intermediate[chosenAngle].length;z++){
+                ActualMaximumValues[(file-1)][z] = Double.toString(intermediate[chosenAngle][z]);
+            }
+            double[][] Fromcsv = csv.getMinsAndMaxes(file, expected[file-1]);
+            for(int z = 0; z < Fromcsv[0].length; z++){
+                DesiredMaximums[(file-1)][z] = Double.toString(Fromcsv[0][z]);
+            }
+            for(int z = 0; z < Fromcsv[1].length; z++){
+                DesiredMinimums[(file-1)][z] = Double.toString(Fromcsv[1][z]);
+            }
+            for(int z = 0; z < Fromcsv[2].length; z++){
+                DesiredMaximumValues[(file-1)][z] = Double.toString(Fromcsv[2][z]);
+            }
+            for(int z = 0; z < Fromcsv[3].length; z++){
+                DesiredMinimumValues[(file-1)][z] = Double.toString(Fromcsv[3][z]);
+            }
 
             file++;
             indexOffset = 1;
@@ -454,12 +503,70 @@ public class Main {
             RepCount = 0;
             newfile = 0;
         }
-        /*for(int g = (file-1); g < capacity; g++){
-            System.out.println("DFinal " + DesiredFinalRepCount[g] + " AFinal " + ActualFinalRepCount[g] + " DTotal " + DesiredTotalRepCount[g] + " ATotal " + ActualTotalRepCount[g]);
-        }*/
+       // for(int g = (file-1); g < capacity; g++){
+        int g =0;
+            System.out.println("DFinal " + DesiredFinalRepCount[g] + " AFinal " + ActualFinalRepCount[g] + " DTotal " + DesiredTotalRepCount[g] + " ATotal " + ActualTotalRepCount[g] + " Desired P2P " + DesiredPeak2Peak[g] +
+                    " Actual " + ActualPeak2Peak[g] + " Desired Angle " + DesiredMostSignificantAngle[g] + " Actual " + ActualMostSignigicantAngle[g]);
+        System.out.print("Actual Maximums: ");
+        for(int x = 0; x < ActualMaximums[g].length; x++){
+            if(Double.parseDouble(ActualMaximums[g][x]) != 0)
+            System.out.print(ActualMaximums[g][x] + ", ");
+        }
+
+        System.out.print("\n");
+        System.out.print("Actual Minimums: ");
+        for(int x = 0; x < ActualMinimums[g].length; x++){
+            if(Double.parseDouble(ActualMinimums[g][x]) != 0)
+            System.out.print(ActualMinimums[g][x] + ", ");
+        }
+        System.out.print("\n");
+        System.out.print("Actual Maximum Values: ");
+        for(int x = 0; x < ActualMaximumValues[g].length; x++){
+            if(Double.parseDouble(ActualMaximumValues[g][x]) != 0)
+                System.out.print(ActualMaximumValues[g][x] + ", ");
+        }
+
+        System.out.print("\n");
+        System.out.print("Actual Minimum Values: ");
+        for(int x = 0; x < ActualMinimumValues[g].length; x++){
+            if(Double.parseDouble(ActualMinimumValues[g][x]) != 0)
+                System.out.print(ActualMinimumValues[g][x] + ", ");
+        }
+        System.out.print("\n");
+
+        System.out.print("Desired Maximums: ");
+        for(int x = 0; x < DesiredMaximums[g].length; x++){
+            if(Double.parseDouble(DesiredMaximums[g][x]) != 0)
+                System.out.print(DesiredMaximums[g][x] + ", ");
+        }
+
+        System.out.print("\n");
+        System.out.print("Desired Minimums: ");
+        for(int x = 0; x < DesiredMinimums[g].length; x++){
+            if(Double.parseDouble(DesiredMinimums[g][x]) != 0)
+                System.out.print(DesiredMinimums[g][x] + ", ");
+        }
+        System.out.print("\n");
+        System.out.print("Desired Maximum Values: ");
+        for(int x = 0; x < DesiredMaximumValues[g].length; x++){
+            if(Double.parseDouble(DesiredMaximumValues[g][x]) != 0)
+                System.out.print(DesiredMaximumValues[g][x] + ", ");
+        }
+
+        System.out.print("\n");
+        System.out.print("Desired Minimum Values: ");
+        for(int x = 0; x < DesiredMinimumValues[g].length; x++){
+            if(Double.parseDouble(DesiredMinimumValues[g][x]) != 0)
+                System.out.print(DesiredMinimumValues[g][x] + ", ");
+        }
+        System.out.print("\n");
+       //
+        //}
         // System.out.print("\n");
-        System.out.println("Done!");
-//        csv.Write(DesiredFinalRepCount, ActualFinalRepCount, DesiredTotalRepCount, ActualTotalRepCount, capacity);
+        System.out.println("Done! ");
+        csv.Write(DesiredFinalRepCount, ActualFinalRepCount, DesiredTotalRepCount, ActualTotalRepCount, capacity, ActualPeak2Peak, DesiredPeak2Peak, DesiredMostSignificantAngle, ActualMostSignigicantAngle);
+        for(int y = 0; y < capacity; y++)
+        csv.Write2(DesiredMaximums, ActualMaximums, DesiredMinimums, ActualMinimums, DesiredMaximumValues, ActualMaximumValues, DesiredMinimumValues, ActualMinimumValues, y);
 
     }
 

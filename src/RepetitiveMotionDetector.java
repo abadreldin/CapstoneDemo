@@ -13,6 +13,10 @@ public class RepetitiveMotionDetector {
     boolean[] isPeriodicAll = new boolean[3];
     int[] trending = new int[3];
     double[] averageAmplitudes = new double[3];
+    double[][] AllMins = new double[3][100];
+    double[][] AllMaxes = new double[3][100];
+    double[][] AllMinValues = new double[3][100];
+    double[][] AllMaxValues = new double[3][100];
 
     int totalReps = 0;
 
@@ -22,7 +26,7 @@ public class RepetitiveMotionDetector {
 
     int[] numMins = new int[3];
     int[] numMaxes = new int[3];
-    double ideal_p2p;
+    double ideal_p2p = 0;
     double upperbound;
     double lowerbound;
     double[] difference = new double[3];
@@ -39,6 +43,8 @@ public class RepetitiveMotionDetector {
     double[] repMaxVal = new double[3];
     int[] newMax = new int[3];
     int[] newMin = new int[3];
+    int[] p = {0,0,0};
+    int[] l = {0,0,0};
 
     public double getfreq(){
         return motionFrequency;
@@ -57,6 +63,16 @@ public class RepetitiveMotionDetector {
     public int getTotalReps() {return totalReps;}
 
     public int getChosenAngle() {return chosenAngle;}
+
+    public double getIdealP2P() {return ideal_p2p;}
+
+    public double[][] getAllMins() {return AllMins;}
+
+    public double[][] getAllMaxes() {return AllMaxes;}
+
+    public double[][] getAllMinValues() {return AllMinValues;}
+
+    public double[][] getAllMaxValues() {return AllMaxValues;}
 
     /*public double upperlimit(){return upperbound;}
 
@@ -293,8 +309,8 @@ public class RepetitiveMotionDetector {
               //  numMins[2] = 1;
                 chosenAngle = 2;
             }
-            if(chosenAngle != -1)
-                System.out.println("First Rep at " + i/40 + " with " + chosenAngle);
+          //  if(chosenAngle != -1)
+            //    System.out.println("First Rep at " + i/40 + " with " + chosenAngle);
         }
 
         else if(Math.abs(numMaxes[chosenAngle] - numMins[chosenAngle]) > 1){
@@ -336,8 +352,8 @@ public class RepetitiveMotionDetector {
                 //  numMins[2] = 1;
                 chosenAngle = 2;
             }
-            if(chosenAngle != -1)
-                System.out.println("Rep Count " + RepCount + " at " + i/40 + " with " + chosenAngle + " because the dif was " + difference[chosenAngle] + " upperbound " + upperbound + " lowerbound " + lowerbound);
+        //    if(chosenAngle != -1)
+          //      System.out.println("Rep Count " + RepCount + " at " + i/40 + " with " + chosenAngle + " because the dif was " + difference[chosenAngle] + " upperbound " + upperbound + " lowerbound " + lowerbound);
         }
         else {
             if (newMax[chosenAngle] == 1 && newMin[chosenAngle] == 1) {
@@ -402,8 +418,8 @@ public class RepetitiveMotionDetector {
                         newMax[chosenAngle] = 0;
                         newMin[chosenAngle] = 0;
                     }
-                    if(chosenAngle != -1)
-                        System.out.println("Rep Count " + RepCount + " at " + i/40 + " with " + chosenAngle + " because the dif was " + difference[chosenAngle] + " upperbound " + upperbound + " lowerbound " + lowerbound);
+                 //   if(chosenAngle != -1)
+                   //     System.out.println("Rep Count " + RepCount + " at " + i/40 + " with " + chosenAngle + " because the dif was " + difference[chosenAngle] + " upperbound " + upperbound + " lowerbound " + lowerbound);
                 }
                 else if (numMaxes[chosenAngle] == numMins[chosenAngle] && numMaxes[chosenAngle] != 0) {
                     difference[chosenAngle] = repMaxVal[chosenAngle] - repMinVal[chosenAngle];
@@ -413,15 +429,16 @@ public class RepetitiveMotionDetector {
                         ideal_p2p = (ideal_p2p + difference[chosenAngle]) / 2;
                         RepCount++;
                         totalReps++;
-                        if(chosenAngle != -1)
-                            System.out.println("Rep Count " + RepCount + " at " + i/40 + " with " + chosenAngle + " because the dif was " + difference[chosenAngle] + " upperbound " + upperbound + " lowerbound " + lowerbound);
+                      //  if(chosenAngle != -1)
+                        //    System.out.println("Rep Count " + RepCount + " at " + i/40 + " with " + chosenAngle + " because the dif was " + difference[chosenAngle] + " upperbound " + upperbound + " lowerbound " + lowerbound);
                     } else if (difference[chosenAngle] < upperbound && difference[chosenAngle] > lowerbound) {
                         RepCount++;
                         totalReps++;
-                        if(chosenAngle != -1)
-                            System.out.println("Rep Count " + RepCount + " at " + i/40 + " with " + chosenAngle + " because the dif was " + difference[chosenAngle] + " upperbound " + upperbound + " lowerbound " + lowerbound);
+                       // if(chosenAngle != -1)
+                            //System.out.println("Rep Count " + RepCount + " at " + i/40 + " with " + chosenAngle + " because the dif was " + difference[chosenAngle] + " upperbound " + upperbound + " lowerbound " + lowerbound);
                     } else {
-                        System.out.println("Repetition out of bounds at " + i + " " + chosenAngle + " because the dif was " + difference[chosenAngle] + " upperbound " + upperbound + " lowerbound " + lowerbound);
+                        System.out.println("Repetition out of bounds");
+                        //System.out.println("Repetition out of bounds at " + i + " " + chosenAngle + " because the dif was " + difference[chosenAngle] + " upperbound " + upperbound + " lowerbound " + lowerbound);
                     }
                         newMax[chosenAngle] = 0;
                         newMin[chosenAngle] = 0;
@@ -451,6 +468,9 @@ public class RepetitiveMotionDetector {
                         numMins[angle]++;
                         newMin[angle] = 1;
                         lastCountedMin[angle] = i;
+                        AllMins[angle][l[angle]] = (double)(i-40)/100;
+                        AllMinValues[angle][l[angle]] = data.get(1);
+                        l[angle]++;
                     }
                 }
                 Reptrending[angle] = 1;
@@ -466,6 +486,9 @@ public class RepetitiveMotionDetector {
                         numMaxes[angle]++;
                         newMax[angle] = 1;
                         lastCountedMax[angle] = i;
+                        AllMaxes[angle][p[angle]] = (double)(i-40)/100;
+                        AllMaxValues[angle][p[angle]] = data.get(1);
+                        p[angle]++;
                     }
                 }
                 Reptrending[angle] = -1;
