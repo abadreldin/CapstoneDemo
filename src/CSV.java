@@ -303,7 +303,7 @@ public class CSV {
 
     public static void Write(String[] DesiredFinalRepCount, String[] ActualFinalRepCount, String[] DesiredTotalRepCount, String[] ActualTotalRepCount, int capacity,
     String[] ideal_p2p, String[] desired_p2p, String[] DesiredSigAng, String[] ActualSigAng) throws FileNotFoundException{
-        PrintWriter pw = new PrintWriter(new File("ResultsTest.csv"));
+        PrintWriter pw = new PrintWriter(new File("ResultsCombined.csv"));
         StringBuilder sb = new StringBuilder();
         /*sb.append("Desired Angle");
         sb.append(',');

@@ -5,9 +5,12 @@ import java.util.List;
 
 
 public class Filtration {
+    int pitch_flip = 0;
+    int roll_flip = 0;
+    int yaw_flip = 0;
 
     /* This function will return a 2D Array that has the flipped and filtered arrays as two rows */
-    public static double[][] Filter(double[] data, int capacity, String angle){
+    public double[][] Filter(double[] data, int capacity, String angle){
         int pitch_flip = 0;
         int roll_flip = 0;
         int yaw_flip = 0;
@@ -37,7 +40,7 @@ public class Filtration {
             filtered_data = Convolution(pitchB, data);
         }
 
-        else if (angle == "roll") {
+      /*  else if (angle == "roll") {
             roll_flip = FlipCheck(data, roll_flip);
             if (roll_flip == 1) {
                 data[0] = data[0] + 360;
@@ -46,7 +49,7 @@ public class Filtration {
                 data[0] = (360 - data[0]) * -1;
             }
             filtered_data = Convolution(rollB, data);
-        }
+        }*/
 
         else if (angle == "yaw") {
             yaw_flip = FlipCheck(data, yaw_flip);
@@ -76,10 +79,7 @@ public class Filtration {
 
     }
 
-    public static ArrayList<Double> PitchFilter(ArrayList<Double> data, int capacity, String angle){
-        int pitch_flip = 0;
-        int roll_flip = 0;
-        int yaw_flip = 0;
+    public ArrayList<Double> PitchFilter(ArrayList<Double> data, int capacity, String angle, int newfile){
         double pitchB[] = {0.0115586129393857, 0.0269127184226144, 0.0689577752425094, 0.124811024018249,
                 0.172306936575946,0.190905865602590,0.172306936575946,0.124811024018249,0.0689577752425094,
                 0.0269127184226144,0.0115586129393857};
@@ -95,6 +95,12 @@ public class Filtration {
         //double filtered_data[] = new double[capacity];
         //double filtered_data_down[] = new double[(capacity/5)+1]; //DOWNSAMPLE2: delete this variable
 
+        if(newfile == 0){
+            pitch_flip = 0;
+            roll_flip = 0;
+            yaw_flip = 0;
+        }
+
         if (angle == "pitch") {
             pitch_flip = PitchFlipCheckArrayList(data, pitch_flip);
             if (pitch_flip == 1) {
@@ -106,7 +112,7 @@ public class Filtration {
             //filtered_data = Convolution(pitchB, data);
         }
 
-        else if (angle == "roll") {
+      /*  else if (angle == "roll") {
             roll_flip = FlipCheckArrayList(data, roll_flip);
             if (roll_flip == 1) {
                 data.add(0,data.get(0) + 360);
@@ -115,10 +121,11 @@ public class Filtration {
                 data.add(0,(360 - data.get(0)) * -1);
             }
             //filtered_data = Convolution(rollB, data);
-        }
+        }*/
 
         else if (angle == "yaw") {
             yaw_flip = FlipCheckArrayList(data, yaw_flip);
+           // System.out.println("Yaw Flip " + yaw_flip);
             if (yaw_flip == 1) {
                 data.add(0,data.get(0) + 360);
             }
@@ -163,11 +170,11 @@ public class Filtration {
         }
 
         else if (alreadyFlipped == 2) {
-            if ((lastVal < 0) && (currVal < 100)){
-                flip = 0;
+            if ((currVal < 50)){
+                flip = 2;
             }
             else
-                flip = 2;
+                flip = 0;
         }
         //if the last point was not flipped then we are checking if the last point was over 300
         //and the current is under 50--> I can show all this logic graphically if it's confusing
@@ -203,11 +210,11 @@ public class Filtration {
         }
 
         else if (alreadyFlipped == 2) {
-            if ((lastVal < 0) && (currVal < 100)){
-                flip = 0;
+            if ((currVal < 50)){
+                flip = 2;
             }
             else
-                flip = 2;
+                flip = 0;
         }
         //if the last point was not flipped then we are checking if the last point was over 300
         //and the current is under 50--> I can show all this logic graphically if it's confusing

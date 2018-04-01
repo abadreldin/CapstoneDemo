@@ -61,9 +61,9 @@ public class InitialPeriodicMotionDetectorArrayList {
 
     public InitialPeriodicMotionDetectorArrayList(){}
 
-    public void finalize() {
+    /*public void finalize() {
         System.out.println("Detector is being destroyed");
-    }
+    }*/
 
 
     public InitialPeriodicMotionDetectorArrayList(int Fs, int arraySize){
