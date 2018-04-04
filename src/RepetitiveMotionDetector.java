@@ -20,7 +20,7 @@ public class RepetitiveMotionDetector {
 
     int totalReps = 0;
 
-    int chosenAngle = -1;
+    int chosenAngle = 2;
 
     int entries = 0;
 
@@ -153,12 +153,12 @@ public class RepetitiveMotionDetector {
 
         //System.out.println(" NEW CALL ");
 
-        isPeriodicCheck(pitch,downsample, 0);
-        isPeriodicCheck(roll,downsample, 1);
-        isPeriodicCheck(yaw,downsample, 2);
+       // isPeriodicCheck(pitch,downsample, 0);
+       // isPeriodicCheck(roll,downsample, 1);
+       // isPeriodicCheck(yaw,downsample, 2);
 
         if(chosenAngle == -1) {
-            if ((averageAmplitudes[0] > averageAmplitudes[1]) && (averageAmplitudes[0] > averageAmplitudes[2])) {
+           /* if ((averageAmplitudes[0] > averageAmplitudes[1]) && (averageAmplitudes[0] > averageAmplitudes[2])) {
                 isPeriodic = isPeriodicAll[0];
                 motionFrequency = motionFrequencyAll[0];
                 motionError = motionErrorAll[0];
@@ -173,7 +173,11 @@ public class RepetitiveMotionDetector {
                 motionFrequency = motionFrequencyAll[2];
                 motionError = motionErrorAll[2];
                 toofast = toofastAll[2];
-            }
+                }*/
+            isPeriodic = isPeriodicAll[0];
+            motionFrequency = motionFrequencyAll[0];
+            motionError = motionErrorAll[0];
+            toofast = toofastAll[0];
         }
         else{
             isPeriodic = isPeriodicAll[chosenAngle];
@@ -192,7 +196,7 @@ public class RepetitiveMotionDetector {
         return isPeriodic;
     }
 
-    public void isPeriodicCheck(ArrayList<Double> data, int downsample, int angle){
+    /*public void isPeriodicCheck(ArrayList<Double> data, int downsample, int angle){
         int p = 0;
         int k = 0;
         ArrayList<Integer> min = new ArrayList<Integer>();
@@ -274,7 +278,7 @@ public class RepetitiveMotionDetector {
                 }
         }
     }
-
+*/
     public void checkForRepsAllAngles(double newPitch, double newRoll, double newYaw, int i){
         pastPitchEntries.add(0, newPitch);
         pastRollEntries.add(0, newRoll);
@@ -282,6 +286,7 @@ public class RepetitiveMotionDetector {
         checkForReps(pastPitchEntries, 0, i);
         checkForReps(pastRollEntries, 1, i);
         checkForReps(pastYawEntries, 2, i);
+//        System.out.print(pastYawEntries.get(0) + ", ");
 
         //if(chosenAngle != -1 && Math.abs(numMaxes[chosenAngle] - numMins[chosenAngle]) > 1)
         //System.out.println("Index " + (i - lastCountedMax[chosenAngle]) + " " + numMaxes[chosenAngle] + " " + numMins[chosenAngle]);
@@ -555,6 +560,16 @@ public class RepetitiveMotionDetector {
                 if (lastMinIndex[angle] != -1) {
                     int min_difference = i - lastMinIndex[angle];
                     if (min_difference > 150 && min_difference < 600) {
+                        isPeriodicAll[angle] = true;
+                        double frequency_val = (1 / (min_difference / 100));
+                        motionFrequencyAll[angle] = (frequency_val + motionFrequencyAll[angle])/2;
+                        motionErrorAll[angle] = true;
+                        if (min_difference > 500)
+                            toofastAll[angle] = false;
+                        else if (min_difference < 300)
+                            toofastAll[angle] = true;
+                        else
+                            motionErrorAll[angle] = false;
                         repMinVal[angle] = data.get(1);
                         numMins[angle]++;
                         newMin[angle] = 1;
@@ -573,6 +588,16 @@ public class RepetitiveMotionDetector {
                 if (lastMaxIndex[angle] != -1) {
                     int max_difference = i - lastMaxIndex[angle];
                     if (max_difference > 150 && max_difference < 600) {
+                        isPeriodicAll[angle] = true;
+                        double frequency_val = (1 / (max_difference / 100));
+                        motionFrequencyAll[angle] = (frequency_val + motionFrequencyAll[angle]) / 2;
+                        motionErrorAll[angle] = true;
+                        if (max_difference > 500)
+                            toofastAll[angle] = false;
+                        else if (max_difference < 300)
+                            toofastAll[angle] = true;
+                        else
+                            motionErrorAll[angle] = false;
                         repMaxVal[angle] = data.get(1);
                         numMaxes[angle]++;
                         newMax[angle] = 1;

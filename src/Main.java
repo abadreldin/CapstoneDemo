@@ -35,7 +35,7 @@ public class Main {
         System.out.println(initDetector.getFs());
 
 
-        int file = 27;
+        int file = 17;
         int original = file;
         int newfile = 0;
         double timeFactor = 0.01;
@@ -73,7 +73,7 @@ public class Main {
         int FirstRep = 0;
         int n = 0;
 
-        int capacity = 27;
+        int capacity = 17;
 
         /*String[] DesiredAngle = new String[capacity];
         String[] ActualAngle = new String[capacity];
@@ -96,8 +96,8 @@ public class Main {
         String[][] ActualMinimumValues = new String[capacity][100];
         String[] DesiredMostSignificantAngle = new String[capacity];
         String[] ActualMostSignigicantAngle = new String[capacity];
-        int[] expected = {2,16,13,3,4,7,4,4,2,6,7,4,4,5,0,6,6,7,7,5,6,3,4,5,6,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,13,11,0,7};
-        //the count under 1 2  3  4 5 6 7 8 9101112131415161718192021222324252627
+        int[] expected = {2,16,13,3,4,7,4,4,2,6,7,4,4,5,0,6,6,7,7,5,6,3,4,5,6,0,4,4,4,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,13,11,0,7};
+        //the count under 1 2  3  4 5 6 7 8 9101112131415161718192021222324252627282930
 
         double[] newPoints = new double[3];
         double idealAngle;
@@ -231,6 +231,7 @@ public class Main {
                 pitch = filtration.PitchFilter(pitch, sizeOfArray, "pitch", newfile);
                 roll = filtration.PitchFilter(roll, sizeOfArray, "roll", newfile);
                 yaw = filtration.PitchFilter(yaw, sizeOfArray, "yaw", newfile);
+                //System.out.print(yaw.get(0)+ ", ");
                 /*System.out.print("Post Pitch: ");
                 for(int i= 0; i < roll.size(); i++) {
                     System.out.print(roll.get(i));
@@ -565,11 +566,11 @@ public class Main {
        //
         //}*/
          System.out.print("\n");
-       // System.out.println("Done! ");
-        csv.Write(DesiredFinalRepCount, ActualFinalRepCount, DesiredTotalRepCount, ActualTotalRepCount, capacity, ActualPeak2Peak, DesiredPeak2Peak, DesiredMostSignificantAngle, ActualMostSignigicantAngle);
+        System.out.println("Done! ");
+        /*csv.Write(DesiredFinalRepCount, ActualFinalRepCount, DesiredTotalRepCount, ActualTotalRepCount, capacity, ActualPeak2Peak, DesiredPeak2Peak, DesiredMostSignificantAngle, ActualMostSignigicantAngle);
         for(int y = (original -1); y < capacity; y++)
         csv.Write2(DesiredMaximums, ActualMaximums, DesiredMinimums, ActualMinimums, DesiredMaximumValues, ActualMaximumValues, DesiredMinimumValues, ActualMinimumValues, y);
-
+*/
     }
 
     private static void printFreq(double[] arr){
